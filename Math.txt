@@ -1,0 +1,12 @@
+Assumptions: 
+	Moving from floors 1->7 = 7->1
+	
+
+Doors opening (seconds): (8, 9.9, 11, 7.8)
+	average = 9.2 seconds
+
+Moving from floors 1 -> 7 (seconds): (17.6, 19.6, 19.6, 22.5)
+	average = 19.8 seconds
+
+Per floor (seconds): (6.5, 8.5, 7.7, 12.7, 8.4, 13.2)
+	average = 9.5 seconds
