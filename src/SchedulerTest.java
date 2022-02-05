@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
  * @author Ryan Nguyen
  * @version February 5th, 2022
  */
-class TestScheduler {
+class SchedulerTest {
 
 	@Test
-	void get() {
+	void TestScheduler() {
 		
 		// Initialize scheduler
 		Scheduler scheduler = new Scheduler();	
