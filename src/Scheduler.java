@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 
 /**
- * The Scheduler class stores an instruction given by
- * the floor or elevator subsystem that is available
- * to be acquired by these subsystems. 
+ * The Scheduler class is a monitor for the list of instructions
+ * for the elevator control system. An instruction can be put into
+ * the scheduler and the first instruction in the list can be taken
+ * from the scheduler. 
  * 
  * @author Aleksandar Veselinovic
- * @version 1.0
+ * @version February 5, 2022
  */
 public class Scheduler{
 	
@@ -22,10 +23,11 @@ public class Scheduler{
 	}
 	
 	/**
-	 * This method putInstructions an instruction in the Scheduler object.
-	 * Once the instruction is putInstruction in the Scheduler object this method returns.
+	 * This method adds an instruction to the end of the instruction list
+	 * in the Scheduler object. Once the instruction is added to the list
+	 * this method returns.
 	 * 
-	 * @param instruction The instruction to putInstruction in the Scheduler object
+	 * @param instruction The instruction to add to the instruction list
 	 */
 	public synchronized void putInstruction(int[] instruction) {
 		while (!isEmpty) {
@@ -41,10 +43,11 @@ public class Scheduler{
 	}
 	
 	/**
-	 * This method takes the instruction from the Scheduler object.
-	 * Once the instruction is taken this method returns.
+	 * This method takes the first instruction from the instruction list
+	 * in the Scheduler object. Once the instruction is taken from the list
+	 * this method returns.
 	 * 
-	 * @return The instruction taken from the Scheduler object
+	 * @return The instruction taken from the instruction list
 	 */
 	public synchronized int[] getInstruction() {
 		while (isEmpty) {
@@ -55,7 +58,7 @@ public class Scheduler{
 			}
 		}
 		int[] nextInstruction = instructions.remove(0);
-		isEmpty = true;
+		isEmpty = instructions.isEmpty();
 		notifyAll();
 		return nextInstruction;
 	}
