@@ -12,6 +12,23 @@ It simply gets the instruction from the scheduler and send it
 back. This demonstrated that we were able to receive the 
 information from the floor through the scheduler.
 
+---------------------- Responsiblities ----------------------
+
+Tyler
+	- Floor Class
+
+Aleksandar
+	- Scheduler Class
+
+Dominique
+	- Diagrams
+	- Math File
+	- README File
+
+Ryan
+	- Elevator Class
+	- SchedulerTest Class
+
 ---------------------- Classes ----------------------
 
 Elevator.java
