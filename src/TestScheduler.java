@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
  * @author Ryan Nguyen
  * @version February 5th, 2022
  */
-class SchedulerTest {
+class TestScheduler {
 
 	@Test
 	void get() {
@@ -32,7 +32,7 @@ class SchedulerTest {
     		int[] instruction = readInputs.get(i);
     		
     		// Put the instructions into a shared memory
-            scheduler.putInstruction(readInputs.get(i));
+            scheduler.putInstruction(instruction);
             
             // Have a temporary variable get the instructions stored
             int[] temp = scheduler.getInstruction();

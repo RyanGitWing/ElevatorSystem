@@ -7,7 +7,8 @@ import java.util.Scanner;
  * The floor class is used to simulate the arrival of passengers
  * to the elevators and simulating buttons being pressed.
  *
- * @author tleung
+ * @author Tyler Leung
+ * @version February 5th, 2022
  */
 public class Floor implements Runnable{
     

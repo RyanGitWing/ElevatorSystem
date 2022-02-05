@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * from the scheduler. 
  * 
  * @author Aleksandar Veselinovic
- * @version February 5, 2022
+ * @version February 5th, 2022
  */
 public class Scheduler implements Runnable{
 	

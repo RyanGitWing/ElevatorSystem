@@ -1,9 +1,8 @@
 /**
- * Main class that run the sandwich making 
- * chef program.
+ * Main class that run the elevator system program.
  * 
  * @author Ryan Nguyen
- * @version January 29, 2022
+ * @version February 5th, 2022
  *
  */
 public class Main 

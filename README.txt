@@ -27,7 +27,7 @@ Dominique
 
 Ryan
 	- Elevator Class
-	- SchedulerTest Class
+	- TestScheduler Class
 
 ---------------------- Classes ----------------------
 
@@ -48,6 +48,11 @@ Floor.java
 
 	The floor class is used to simulate the arrival of passengers
  	to the elevators and simulating buttons being pressed.
+
+TestScheduler.java
+	
+	Test class for scheduler testing if it can properly receive the
+	input file and store it.
 
 Main.java
 
