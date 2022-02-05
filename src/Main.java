@@ -19,9 +19,11 @@ public class Main
 
 		Thread elevator = new Thread(new Elevator(scheduler));
 		Thread floor = new Thread(new Floor(scheduler));
+		Thread schedulerThread = new Thread(scheduler);
 		
 		elevator.start();
 		floor.start();
+		schedulerThread.start();
 		
 	}
 

@@ -99,7 +99,7 @@ public class Floor implements Runnable{
     public void run(){
     	
         //ArrayList containing the instructions from the file
-        ArrayList<int[]> readInputs = readInput(new File("D:\\School\\SYSC 3303\\workspace\\ElevatorProject\\src\\inputFile.txt"));
+        ArrayList<int[]> readInputs = readInput(new File("src\\inputFile.txt"));
 
         //for loop that goes through each array in the arraylist. this simulates each line of instructions
         for(int[] i : readInputs)

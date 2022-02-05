@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author Aleksandar Veselinovic
  * @version February 5, 2022
  */
-public class Scheduler{
+public class Scheduler implements Runnable{
 	
 	private ArrayList<int[]> instructions;
 	private boolean isEmpty;
@@ -61,6 +61,10 @@ public class Scheduler{
 		isEmpty = instructions.isEmpty();
 		notifyAll();
 		return nextInstruction;
+	}
+
+	@Override
+	public void run() {
 	}
 
 }

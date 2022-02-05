@@ -1,22 +1,40 @@
+---------------------- Description ----------------------
+
+Elevator system that reads and process an instruction file.
+The floor acts as the client which instructs the elevator on
+where to go pick up an individual. The scheduler acts as the 
+middle which takes the information provided by the floor and
+delivers it to the elevator. The elevator, also a client,
+gets the information and follows the instructions.
+
+Currently, in this iteration, the elevator does not do anything.
+It simply gets the instruction from the scheduler and send it 
+back. This demonstrated that we were able to receive the 
+information from the floor through the scheduler.
+
 ---------------------- Classes ----------------------
 
 Elevator.java
 
-	Agent randomly picks two ingredients and puts them
-	on the table.
+	Elevator class that creates an elevator object which moves
+ 	from one floor to another based on the request. 
+	(currently does not move)
 
 Scheduler.java
 
-	Chef takes ingredients from the table, makes a 
-	sandwich and eats it.
+	The scheduler class is a monitor for the list of instructions
+ 	for the elevator control system. An instruction can be put into
+ 	the scheduler and the first instruction in the list can be taken
+ 	from the scheduler. 
 
 Floor.java
 
-	Ingredients to make a sandwich.
+	The floor class is used to simulate the arrival of passengers
+ 	to the elevators and simulating buttons being pressed.
 
 Main.java
 
-	Run the elevator control system and simulator.
+	Run the elevator control system simulator.
 
 ---------------------- Instructions ----------------------
 
