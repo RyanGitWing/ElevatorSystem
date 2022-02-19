@@ -9,16 +9,127 @@ public class Elevator implements Runnable{
 		
 	private Scheduler scheduler;
 	
+	private static final int TIME_BETWEEN_EACH_FLOOR = 3000;
+
+	private static final long TIME_TO_OPEN_CLOSE = 1000; 
+	
+	private int id;
+	
+	private int currentFloor;
+		
+	private boolean doorClosed;
+	
+	private Motor motor;
+	
+	private int direction;
+	
+	private int destination;
+
+	
 	/**
 	 * Elevator Constructor.
 	 * 
 	 * @param scheduler
 	 */
-	public Elevator(Scheduler scheduler) {
+	public Elevator(Scheduler scheduler, int id) {
 		
 		this.scheduler = scheduler;
+		this.id = id;
+		currentFloor = 1;
+		direction = 1;
+		doorClosed = false;
+		motor = new Motor();
 		
 	}
+	
+	/**
+	 * Get the elevator ID.
+	 * 
+	 * @return
+	 */
+	public int getElevatorID() {
+		
+		return this.id;
+		
+	}
+	
+	public Motor getMotor() {
+		return motor;
+	}
+	
+	/**
+	 * Move elevator to the next floor requested.
+	 */
+	public void turnOnMotor() {
+		
+		motor.toggleMotor(true);
+		
+		while (motor.getOn()) 
+		{
+			int temp = currentFloor - destination;
+			int distanceBetweenFloor = Math.abs(temp);
+			
+			try {
+				Thread.sleep(TIME_BETWEEN_EACH_FLOOR * distanceBetweenFloor);
+			} catch (InterruptedException e){
+				
+			}
+			
+			if (temp > 0) {
+				currentFloor--;
+			} else {
+				currentFloor++;
+			}
+			System.out.println("Floor " + currentFloor + " detected Elevator");
+			scheduler.stopAtFloor(currentFloor, destination);
+		}
+
+	}
+	
+	public void setDestination(int floor) {
+		destination = floor;
+	}
+	
+	/**
+	 * Open/Closed the door based on request.
+	 * 
+	 * @param openDoor
+	 */
+	public void setDoor(boolean closeDoor) {
+		
+		try {
+			Thread.sleep(TIME_TO_OPEN_CLOSE);
+		} catch (InterruptedException e) {
+			
+		}
+		
+		doorClosed = closeDoor;
+		
+	}
+	
+	public int getCurrentFloor() {
+		return currentFloor;
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 */
+	public void arriveAtFloor() {
+	
+		motor.toggleMotor(false);
+		
+	}
+	
+	public int getDirection() {
+		return direction;
+	}
+
+	public void setDirection(int direction) {
+		this.direction = direction;
+	}
+	
 	
 	@Override
 	/**
@@ -29,23 +140,7 @@ public class Elevator implements Runnable{
 	public void run() {
 		
 		while (true) 
-		{
-			// Get the instructions from scheduler
-			int[] returnedInstruction = scheduler.getInstruction();
-		    
-			// Convert the direction from an integer to a proper readable string
-			String direction = returnedInstruction[2] == 1 ? "Up" : "Down";
-		    
-			// Output the information from the command
-			System.out.println("Time: " + returnedInstruction[0] + ", Source Floor: " + returnedInstruction[1] + 
-					", Direction: " + direction + ", Destination Floor: " + returnedInstruction[3]);
-			
-			// Return the instructions to scheduler
-			scheduler.putInstruction(returnedInstruction);
-			
-			// Let user know the instruction was sent back
-			System.out.println("Instructions Sent Back.");
-			
+		{	
 			// Slow down the thread execution
 			try{
 				Thread.sleep(1000);
@@ -54,7 +149,7 @@ public class Elevator implements Runnable{
 			}
 		}
 	}
-	
+
 	
 
 }

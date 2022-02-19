@@ -8,7 +8,7 @@ import java.util.Scanner;
  * to the elevators and simulating buttons being pressed.
  *
  * @author Tyler Leung
- * @version February 5th, 2022
+ * @version February 19th, 2022
  */
 public class Floor implements Runnable{
     
@@ -58,13 +58,9 @@ public class Floor implements Runnable{
                 //Array splitting the string by each whitespace to distinguish parts
 	            String[] splitString = scanner.nextLine().split(" ");
 	            
-                //Splits time string from instruction by each colon
-	            String[] time = splitString[0].split(":");
-  
-	            //Calculated the total time into ms
-	            int convertedTime = Integer.parseInt(time[0])*3600000 + Integer.parseInt(time[1])*60000 + 
-	            		Integer.parseInt(time[2])*1000 + Integer.parseInt(time[3]);
 	            
+	            int convertedTime = TimeConverter.timeToMS(splitString[0]);
+
                 //Stores each part of the line read into the array to store
 	            storedInstructions[0] = convertedTime;                          //time in ms
 	            storedInstructions[1] = Integer.parseInt(splitString[1]);       //source floor
@@ -105,22 +101,14 @@ public class Floor implements Runnable{
         //for loop that goes through each array in the arraylist. this simulates each line of instructions
         for(int[] i : readInputs)
         {
-
-            //puts the instructions into a shared memory
-            scheduler.putInstruction(i);
-            
-            //tells the user that the instructions have been sent
-            System.out.println("Instructions Sent.");
-            
-            //gets the instructions back from the scheduler
-            int[] returnedInstruction = scheduler.getInstruction();
-            
-            //converts the direction from an int to a proper readable string
-            String direction = returnedInstruction[2] == 1 ? "Up" : "Down";
-            
-            //prints out the information from the command
-            System.out.println("Time: " + returnedInstruction[0] + ", Source Floor: " + returnedInstruction[1] + 
-            		", Direction: " + direction + ", Destination Floor: " + returnedInstruction[3]);
+        	
+        	String direction = i[2] == 1 ? "up" : "down";
+        	
+        	System.out.print("Sending request to scheduler at " + TimeConverter.msToTime(i[0]));
+        	System.out.print(" from floor " + i[1] + " to go " + direction + ".\n");
+        	
+        	//puts the instructions into a shared memory
+            scheduler.putRequest(i);
             
             //slows down the thread execution
             try{

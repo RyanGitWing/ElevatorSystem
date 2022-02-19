@@ -1,70 +1,106 @@
 import java.util.ArrayList;
-
 /**
- * The Scheduler class is a monitor for the list of instructions
- * for the elevator control system. An instruction can be put into
- * the scheduler and the first instruction in the list can be taken
- * from the scheduler. 
+ * Main class that run the elevator system program.
  * 
- * @author Aleksandar Veselinovic
- * @version February 5th, 2022
+ * @author Ryan Nguyen
+ * @version February 19, 2022
+ *
  */
-public class Scheduler implements Runnable{
+public class Scheduler implements Runnable {
 	
-	private ArrayList<int[]> instructions;
-	private boolean isEmpty;
+	private ArrayList<int[]> requests;
+	private ArrayList<Elevator> elevators;
 	
-	/**
-	 * Constructor of a Scheduler object
-	 */
 	public Scheduler() {
-		instructions = new ArrayList<int[]>();
-		isEmpty = true;
+		requests = new ArrayList<int[]>();
+		elevators = new ArrayList<Elevator>();
 	}
 	
-	/**
-	 * This method adds an instruction to the end of the instruction list
-	 * in the Scheduler object. Once the instruction is added to the list
-	 * this method returns.
-	 * 
-	 * @param instruction The instruction to add to the instruction list
-	 */
-	public synchronized void putInstruction(int[] instruction) {
-		while (!isEmpty) {
+	public void addElevator(Elevator elevator) {
+		elevators.add(elevator);
+	}
+	
+	public synchronized void putRequest(int[] request) {
+		System.out.println("Received request!");
+		requests.add(request);
+		notifyAll();
+	}
+
+	public synchronized void stopAtFloor(int currentFloor, int destination) {
+		int[] currentRequest = requests.get(0);
+		if (currentFloor == destination) {
+			stopElevator(elevators.get(0));
+		}
+	}
+
+	public void moveElevator(Elevator elevator, int destination, int direction) {
+		
+		elevator.setDoor(true);
+		
+		System.out.println("Elevator door closed");
+		
+		elevator.setDestination(destination);		
+		elevator.setDirection(direction);
+		
+		String directionString = direction == 1 ? "up" : "down";
+		
+		System.out.println("Elevator going " + directionString + " to floor " + destination + "\n");
+		elevator.turnOnMotor();
+		
+	}
+
+	public void stopElevator(Elevator elevator) {
+		elevator.arriveAtFloor();
+		
+		System.out.println("\n" + "Elevator has arrived at floor " + elevator.getCurrentFloor());
+		
+		elevator.setDoor(false);
+		
+		System.out.println("Elevator door opened \n");
+		
+	} 
+	
+	public synchronized void readRequest() {
+		if (requests.isEmpty()) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
-				return;
+
 			}
-		}
-		instructions.add(instruction);
-		isEmpty = false;
-		notifyAll();
-	}
-	
-	/**
-	 * This method takes the first instruction from the instruction list
-	 * in the Scheduler object. Once the instruction is taken from the list
-	 * this method returns.
-	 * 
-	 * @return The instruction taken from the instruction list
-	 */
-	public synchronized int[] getInstruction() {
-		while (isEmpty) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				return null;
+		} else {
+			
+			System.out.println("Scheduler executing request \n");
+			
+			int currentFloor = elevators.get(0).getCurrentFloor();
+			int sourceFloor = requests.get(0)[1];
+			
+			if (sourceFloor != currentFloor) {
+				
+				int initialDirection = 0;
+				
+				if ((sourceFloor - currentFloor) > 0) {
+					initialDirection = 1;
+				}
+							
+				moveElevator(elevators.get(0), sourceFloor, initialDirection);
+				
+			} else {
+				System.out.println("Elevator is already at floor " + sourceFloor);
 			}
+			
+			moveElevator(elevators.get(0), requests.get(0)[3], requests.get(0)[2]);
+			
+			requests.remove(0);
 		}
-		int[] nextInstruction = instructions.remove(0);
-		isEmpty = instructions.isEmpty();
-		notifyAll();
-		return nextInstruction;
 	}
 
 	@Override
 	public void run() {
+		while (true) {
+			readRequest();
+			// get request from floor
+			// execute request
+		}
 	}
 
 }

@@ -13,38 +13,28 @@ import org.junit.jupiter.api.Test;
  */
 class SchedulerTest {
 
+	// Initialize scheduler
+	Scheduler scheduler = new Scheduler();	
+		
+	Elevator elevator = new Elevator(scheduler, 1);
+				
+	// Initialize scheduler
+	Floor floor = new Floor(scheduler);
+
 	@Test
-	void TestScheduler() {
+	void TestMoveElevator() {
 		
-		// Initialize scheduler
-		Scheduler scheduler = new Scheduler();	
+		scheduler.addElevator(elevator);
+
+		// Assign a variable an instruction
+		int[] request = {1400150, 2, 1, 4};
 		
-		// Initialize scheduler
-		Floor floor = new Floor(scheduler);
-		
-        // ArrayList containing the instructions from the file
-        ArrayList<int[]> readInputs = floor.readInput(new File("src\\inputFile.txt"));
+		// Put the instructions into a shared memory
+        scheduler.putRequest(request);
         
-        // Loop through each line and get instructions
-    	for (int i = 0; i < readInputs.size(); i++) 
-    	{
-    		// Assign a variable an instruction
-    		int[] instruction = readInputs.get(i);
-    		
-    		// Put the instructions into a shared memory
-            scheduler.putInstruction(instruction);
-            
-            // Have a temporary variable get the instructions stored
-            int[] temp = scheduler.getInstruction();
-            
-            // Loop through each element to see if it matches the elements from instruction variable
-    		for(int j = 0; j < temp.length; j++) 
-    		{
-    			assertEquals(instruction[j], temp[j]);
-    			System.out.println(instruction[j]);
-    		}
-    		
-    	}
+        scheduler.moveElevator(elevator, request[1], request[2]);
+        
+        assertEquals(elevator.getCurrentFloor(), request[1]);
           
 	}
 	
