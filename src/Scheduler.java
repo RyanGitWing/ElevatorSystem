@@ -52,8 +52,7 @@ public class Scheduler implements Runnable {
 	 * @param currentFloor the floor the elevator is currently at
 	 * @param destination the floor the elevator needs to stop at
 	 */
-	public synchronized void stopAtFloor(int currentFloor, int destination) {
-		int[] currentRequest = requests.get(0);
+	public void stopAtFloor(int currentFloor, int destination) {
 		if (currentFloor == destination) {
 			stopElevator(elevators.get(0));
 		}
@@ -127,7 +126,7 @@ public class Scheduler implements Runnable {
 				moveElevator(elevators.get(0), sourceFloor, initialDirection);//move the elevator to the floor where the request was made
 				
 			} else {//if the elevator is already at the floor it needs to go to
-				System.out.println("Elevator is already at floor " + sourceFloor);
+				System.out.println("Elevator is already at floor " + sourceFloor + "\n");
 			}
 			
 			moveElevator(elevators.get(0), requests.get(0)[3], requests.get(0)[2]);//move the elevator to the passenger's destination floor

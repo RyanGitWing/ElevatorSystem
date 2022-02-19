@@ -28,6 +28,7 @@ Tyler
 
 Aleksandar
 	- Scheduler Class
+	- SchedulerTest Class
 
 Dominique
 	- UML Diagrams
@@ -35,7 +36,8 @@ Dominique
 
 Ryan
 	- Elevator Class
-	- SchedulerTest Class
+	- ElevatorTest Class
+	- FloorTest Class
 
 Harrison
 	- State Diagrams
@@ -96,5 +98,8 @@ Main.java
 	three threads, one for the floor, one for the elevator and one for the scheduler.
 
 ---------------------- Instructions ----------------------
+
+(For less wait time for outputs, you can change the values of 
+TIME_BETWEEN_EACH_FLOOR and TIME_TO_OPEN_CLOSE to something smaller.)
 
 1. Run Main.java
