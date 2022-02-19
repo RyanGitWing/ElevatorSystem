@@ -1,17 +1,41 @@
-
-public class Motor {
-	
+/**
+ * Motor class that creates an motor object which
+ * turns the elevator motor on and off.
+ *
+ * @author Ryan Nguyen
+ * @version February 19th, 2022
+ */
+public class Motor 
+{ 
 	private boolean isOn; 
 	
-	public Motor() {
+	/**
+	 * Motor Constructor.
+	 */
+	public Motor() 
+	{
+		// By default the motor is off
 		isOn = false;
 	}
 	
-	public void toggleMotor(boolean isOn) {
+	/**
+	 * Setter motor function. Changes the state
+	 * of the motor.
+	 * 
+	 * @param isOn turns the motor on or off.
+	 */
+	public void toggleMotor(boolean isOn) 
+	{
 		this.isOn = isOn;
 	}
 	
-	public boolean getOn() {
+	/**
+	 * Getter method for the motor state.
+	 * 
+	 * @return The state of the motor.
+	 */
+	public boolean getOn() 
+	{
 		return isOn;
 	}
 }

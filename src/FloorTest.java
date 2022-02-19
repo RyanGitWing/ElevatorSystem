@@ -1,27 +1,30 @@
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.io.File;
 import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
-
 /**
- * Scheduler Test Case.
+ * Floor Test Case.
  *
  * @author Ryan Nguyen
- * @version February 5th, 2022
+ * @version February 19th, 2022
  */
-class FloorTest {
+class FloorTest 
+{
+	
 	@Test
-	void TestReadInput() {
+	void TestReadInput() 
+	{
+		
 		// Initialize scheduler
 		Scheduler scheduler = new Scheduler();	
 		
 		// Initialize scheduler
 		Floor floor = new Floor(scheduler);
 		
+		// An arraylist with the expected arrays
 		ArrayList<int[]> expectedInputs = new ArrayList<int[]>();
 		
+		// Arrays with the expected request
 		int[] arr1 = {50415000, 2, 1, 4};
 		expectedInputs.add(arr1);
 		
@@ -34,10 +37,10 @@ class FloorTest {
 		int[] arr4 = {53756008, 7, 0, 1};
 		expectedInputs.add(arr4);	
 		
-		
-		//ArrayList containing the instructions from the file
+		// ArrayList containing the instructions from the file
 		ArrayList<int[]> readInputs = floor.readInput(new File("src//inputFile.txt"));
 		
+		// Check if the values from the input file match the expected result
 		for(int i = 0; i < 4; i++)
         {
 			assertEquals(readInputs.get(i)[0], expectedInputs.get(i)[0]);

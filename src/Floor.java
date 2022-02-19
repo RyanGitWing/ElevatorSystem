@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 /**
  * The floor class is used to simulate the arrival of passengers
  * to the elevators and simulating buttons being pressed.
@@ -101,7 +100,8 @@ public class Floor implements Runnable{
         //for loop that goes through each array in the arraylist. this simulates each line of instructions
         for(int[] i : readInputs)
         {
-        	
+        	//direction from input file was converted into an integer
+        	//now we want it back to a string to display it 
         	String direction = i[2] == 1 ? "up" : "down";
         	
         	System.out.print("Sending request to scheduler at " + TimeConverter.msToTime(i[0]));

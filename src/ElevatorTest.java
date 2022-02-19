@@ -1,46 +1,38 @@
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.File;
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
-
 /**
- * Scheduler Test Case.
+ * Elevator Test Case.
  *
  * @author Ryan Nguyen
- * @version February 5th, 2022
+ * @version February 19th, 2022
  */
-class ElevatorTest {
-
+class ElevatorTest 
+{
+	
 	// Initialize scheduler
 	Scheduler scheduler = new Scheduler();	
-		
+	
+	// Initialize elevator
 	Elevator elevator = new Elevator(scheduler, 1);
 				
 	@Test
-	void TestTurnOnMotor() {
-		
+	void testArriveAtFloor() 
+	{
 		elevator.arriveAtFloor();
-		
-		assertFalse(elevator.getMotor().getOn());
-          
+		assertFalse(elevator.getMotor().getOn());  
 	}
 	
 	@Test
-	void TestGetElevatorID() {
-		
+	void testGetElevatorID() 
+	{
 		assertEquals(elevator.getElevatorID(), 1);
-          
 	}
 	
 	@Test
-	void TestGetDirection() {
-		
+	void testGetDirection() 
+	{
 		elevator.setDirection(0);
-		
-		assertEquals(elevator.getDirection(), 0);
-          
+		assertEquals(elevator.getDirection(), 0); 
 	}
-	
+
 }
