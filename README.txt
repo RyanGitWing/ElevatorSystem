@@ -59,11 +59,10 @@ Motor.java
 
 Scheduler.java
 
-	The scheduler class is a monitor for the list of instructions
- 	for the elevator control system. An instruction can be put into
- 	the scheduler and the first instruction in the list can be taken
- 	from the scheduler. The scheduler also tells the elevator when to
-	move and stop based on the instruction read. 
+	The Scheduler class takes requests from the floor subsystem
+ 	and executes each request. Executing the request entails commanding
+ 	the elevator to move to the floor where the request was made and then
+ 	commanding the elevator to move to the passenger's destination floor. 
 
 Floor.java
 
