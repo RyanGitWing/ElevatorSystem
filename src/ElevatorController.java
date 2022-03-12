@@ -46,6 +46,10 @@ public class ElevatorController implements Runnable {
 		requests.add(request);
 	}
 	
+	public int[] getInfo() {
+		return elevatorInfo;
+	}
+	
 	public void stopElevator() {
 		sendControl((byte) 5);//Stop elevator's motor
 		moving = false;

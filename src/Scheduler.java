@@ -17,14 +17,13 @@ public class Scheduler implements Runnable {
     private FloorRequestHandler requestHandler;
     
     //elevatorInfo = [Port, current floor, direction, dest floor, # passengers]
-    private ArrayList<int[]> elevatorInfoList;
+    //private ArrayList<int[]> elevatorInfoList;
     
     /**
      * Constructor of a Scheduler object.
      */
     public Scheduler(int requestPort, int numElevators) {
         controllers = new ArrayList<ElevatorController>();
-        elevatorInfoList = new ArrayList<int[]>();
         requestHandler = new FloorRequestHandler(requestPort);
         
         Thread requestHandlerThread = new Thread(requestHandler);
@@ -38,8 +37,6 @@ public class Scheduler implements Runnable {
     private void createController(int port) {
         ElevatorController controller = new ElevatorController(port);
         controllers.add(controller);
-        int[] elevatorInfo = {port, 1, 1, 1, 0};
-        elevatorInfoList.add(elevatorInfo);
         Thread controllerthread = new Thread(controller);
         controllerthread.start();        
     }
@@ -53,8 +50,9 @@ public class Scheduler implements Runnable {
 
     public int getElevator(int destination) {
         int closestElevator = 1000;
-        int port = 0;
-        for (int[] elevatorInfo : elevatorInfoList) {
+        int port = PORTOFFSET;
+        for (ElevatorController controller : controllers) {
+        	int[] elevatorInfo = controller.getInfo();
             int difference = elevatorInfo[1] - destination;
             boolean isEligible = (difference >= 0 && elevatorInfo[2] == 0) || (difference <= 0 && elevatorInfo[2] == 1);
             //for direction could include 2 for not moving
