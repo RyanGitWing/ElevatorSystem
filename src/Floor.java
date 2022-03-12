@@ -2,6 +2,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 /**
  * The floor class is used to simulate the arrival of passengers
  * to the elevators and simulating buttons being pressed.
@@ -11,8 +20,9 @@ import java.util.Scanner;
  */
 public class Floor implements Runnable{
     
-    //Scheduler object
-    private Scheduler scheduler;
+	private DatagramPacket sendPacket;	
+	private DatagramSocket controlSocket;
+	
 
     /**
      * Floor constructor that takes in a scheduler object.
@@ -20,11 +30,13 @@ public class Floor implements Runnable{
      * 
      * @param scheduler Scheduler object used to put instructions 
      */
-    public Floor(Scheduler scheduler){
-    	
-        //Set scheduler to this classes scheduler
-        this.scheduler = scheduler;
-        
+    public Floor(){
+        try {
+            controlSocket = new DatagramSocket();
+        } catch (SocketException se) {   
+            se.printStackTrace();
+            System.exit(1);
+        }
     }
 
     /**
@@ -37,7 +49,7 @@ public class Floor implements Runnable{
      * @param inputFile File containing instructions for elevators
      * @return ArrayList containing all instructions from file
      */
-    public ArrayList<int[]> readInput(File inputFile){
+    public void readInput(File inputFile){
     	
         //ArrayList containing the parsed instructions
         ArrayList<int[]> parsedInput = new ArrayList<int[]>();
@@ -50,25 +62,26 @@ public class Floor implements Runnable{
 	        //Keeps reading while there is information on the next line
 	        while(scanner.hasNextLine())
 	        {
+	        	String line = scanner.nextLine();
+	        	int len = line.length();
+	            byte[] msg = new byte[len];
+	        	msg = line.getBytes();
+	        	//create datagram
+	        	try {
+	    			sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), 4999);
+	    		} catch (UnknownHostException e) {
+	    			e.printStackTrace();
+	    	        System.exit(1);
+	    		}
 	        	
-                //Array to contain the information from the line
-	            int[] storedInstructions = new int[4];
-	            
-                //Array splitting the string by each whitespace to distinguish parts
-	            String[] splitString = scanner.nextLine().split(" ");
-	            
-	            
-	            int convertedTime = TimeConverter.timeToMS(splitString[0]);
-
-                //Stores each part of the line read into the array to store
-	            storedInstructions[0] = convertedTime;                          //time in ms
-	            storedInstructions[1] = Integer.parseInt(splitString[1]);       //source floor
-	            storedInstructions[2] = splitString[2].equals("Up") ? 1 : 0;    //direction of elevator (up = 1, down = 0)
-	            storedInstructions[3] = Integer.parseInt(splitString[3]);       //destination floor
-	            
-                //adds the array of instructions into the arraylist
-	            parsedInput.add(storedInstructions);
-	           
+	        	//Send Datagram
+	        	System.out.println("Sending Request");
+	        	try {
+					controlSocket.send(sendPacket);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+	        	
 	        }
 
             //closes scanner to stop any possible memory leak
@@ -80,9 +93,6 @@ public class Floor implements Runnable{
 			System.out.println("File not found.");
 		
         }
-       
-        //returned arraylist
-        return parsedInput;
     }
 
     /**
@@ -93,29 +103,11 @@ public class Floor implements Runnable{
      */
     @Override
     public void run(){
-    	
-        //ArrayList containing the instructions from the file
-        ArrayList<int[]> readInputs = readInput(new File("src\\inputFile.txt"));
-
-        //for loop that goes through each array in the arraylist. this simulates each line of instructions
-        for(int[] i : readInputs)
-        {
-        	//direction from input file was converted into an integer
-        	//now we want it back to a string to display it 
-        	String direction = i[2] == 1 ? "up" : "down";
-        	
-        	System.out.print("Sending request to scheduler at " + TimeConverter.msToTime(i[0]));
-        	System.out.print(" from floor " + i[1] + " to go " + direction + ".\n");
-        	
-        	//puts the instructions into a shared memory
-            scheduler.putRequest(i);
-            
-            //slows down the thread execution
-            try{
-                Thread.sleep(1000);
-            } catch (InterruptedException e){
-                
-            }
-        }
+    	readInput(new File("src\\inputFile.txt"));
+    }
+    
+    public static void main(String[] args) {
+    	Thread f = new Thread(new Floor());
+    	f.start();
     }
 }
