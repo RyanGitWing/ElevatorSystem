@@ -72,10 +72,8 @@ public class FloorRequestHandler implements Runnable {
 			}
 		}
         requests.add(request);
-        System.out.println("Scheduler received request!");
-        System.out.print(TimeConverter.msToTime(request[0]));
         String direction = request[2] == 1 ? "up" : "down";
-        System.out.println(": From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
+        System.out.println("Scheduler received request:\n" + TimeConverter.msToTime(request[0]) + ": From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
 
 		notifyAll();
 	}

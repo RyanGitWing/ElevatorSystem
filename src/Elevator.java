@@ -252,7 +252,12 @@ public class Elevator implements Runnable
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Thread elevator1 = new Thread(new Elevator(5000));
+		int numberOfElevators = 1;
+		for (int i = 0; i < numberOfElevators; i++) {
+			Thread elevator1 = new Thread(new Elevator(5000+i));
+			elevator1.start();
+		}
+		/*Thread elevator1 = new Thread(new Elevator(5000));
 		Thread elevator2 = new Thread(new Elevator(5001));
 		Thread elevator3 = new Thread(new Elevator(5002));
 		Thread elevator4 = new Thread(new Elevator(5003));
@@ -260,7 +265,7 @@ public class Elevator implements Runnable
 		elevator1.start();
 		elevator2.start();
 		elevator3.start();
-		elevator4.start();
+		elevator4.start();*/
 	}
     
 	@Override

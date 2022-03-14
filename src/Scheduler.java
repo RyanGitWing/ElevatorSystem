@@ -88,7 +88,7 @@ public class Scheduler implements Runnable {
      * @param args
      */
     public static void main(String[] args) {
-        Scheduler scheduler = new Scheduler(4);
+        Scheduler scheduler = new Scheduler(1);
         Thread schedulerThread = new Thread(scheduler);
         FloorRequestHandler requestHandler = new FloorRequestHandler(4999);
         scheduler.addHandler(requestHandler);
@@ -107,7 +107,7 @@ public class Scheduler implements Runnable {
             int[] request = requestHandler.getRequest();
             
             int elevatorPort = getElevator(request[1]);
-            System.out.println("Scheduler using Elevator " + elevatorPort + " to execute request.");
+            System.out.println("Scheduler using Elevator " + elevatorPort + " to execute request " + request[1] + "," + request[3]);
             controllers.get(elevatorPort - PORTOFFSET).executeRequest(request);
         }
     }

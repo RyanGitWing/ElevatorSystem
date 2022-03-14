@@ -76,17 +76,21 @@ public class ElevatorController implements Runnable {
 		activeJob = request;
 		inUse = true;
 		
-		//Calculate the initial direction of the Elevator to reach the Passenger based on the request's source floor and the Elevator's current floor
-		int direction = elevatorInfo[1]-activeJob[1] < 0 ? 1 : 0;
-		
-		elevatorInfo[1] = direction;//Update elevator direction
-		elevatorInfo[2] = activeJob[1];//Update destination to request's source
-		
-		//Move Elevator to the source floor
-		moveElevator(activeJob[1], direction);
-		while (moving) {//Listen until the elevator reaches the source floor
-			receiveControl();
-		}// Elevator has arrived at source
+		if (elevatorInfo[0] != activeJob[1]) { //elevator already at src floor
+			//Calculate the initial direction of the Elevator to reach the Passenger based on the request's source floor and the Elevator's current floor
+			int direction = elevatorInfo[0]-activeJob[1] < 0 ? 1 : 0;
+			
+			elevatorInfo[1] = direction;//Update elevator direction
+			elevatorInfo[2] = activeJob[1];//Update destination to request's source
+			
+			//Move Elevator to the source floor
+			moveElevator(activeJob[1], direction);
+			while (moving) {//Listen until the elevator reaches the source floor
+				receiveControl();
+			}// Elevator has arrived at source
+		} else {
+			System.out.println("Elevator " + port + " is already at the source floor: " + activeJob[1]);
+		}
 		
 		//Prepare to move to destination
 		elevatorInfo[1] = activeJob[2];//Update elevator direction
@@ -220,11 +224,13 @@ public class ElevatorController implements Runnable {
 			System.out.println("Passenger Left");
 			break;
 		case 13://Elevator has changed to a new floor
-			System.out.println("elevator arrived at floor " + msg[1]);
+			System.out.println("elevator " + port + " arrived at floor " + msg[1] + ", destination: " + elevatorInfo[2]);
 			elevatorInfo[0] = msg[1];//Update current floor
 			if(elevatorInfo[0]==elevatorInfo[2]) { //Check if the elevator has reached its destination
+				System.out.println("Stop");
 				stopElevator(); // Elevator has reached destination
 			} else {
+				System.out.println("Continue");
 				sendControl((byte) 15); // Do not stop
 			}
 			break;
