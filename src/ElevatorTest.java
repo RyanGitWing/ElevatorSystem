@@ -4,35 +4,34 @@ import org.junit.jupiter.api.Test;
  * Elevator Test Case.
  *
  * @author Ryan Nguyen
- * @version February 19th, 2022
+ * @version March 12, 2022
  */
 class ElevatorTest 
 {
 	
-	// Initialize scheduler
-	Scheduler scheduler = new Scheduler();	
-	
-	// Initialize elevator
-	Elevator elevator = new Elevator(scheduler, 1);
-				
 	@Test
-	void testArriveAtFloor() 
+	void testSetDirection() 
 	{
-		elevator.arriveAtFloor();
-		assertFalse(elevator.getMotor().getOn());  
+		Elevator elevator = new Elevator(6006);
+
+		elevator.setDirection(0);
+		assertEquals(elevator.getDirection(), 0); 
+	}
+	
+	@Test
+	void testDecodeControl() 
+	{
+		Elevator elevator = new Elevator(8888);
+		byte []b = {2};
+		elevator.decodeControl(b);
+		assertEquals(elevator.getDirection(), 1); 
 	}
 	
 	@Test
 	void testGetElevatorID() 
 	{
-		assertEquals(elevator.getElevatorID(), 1);
-	}
-	
-	@Test
-	void testGetDirection() 
-	{
-		elevator.setDirection(0);
-		assertEquals(elevator.getDirection(), 0); 
+		Elevator elevator = new Elevator(7777);
+		assertEquals(elevator.getElevatorID(), 7777); 
 	}
 
 }

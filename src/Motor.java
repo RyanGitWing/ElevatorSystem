@@ -3,7 +3,7 @@
  * turns the elevator motor on and off.
  *
  * @author Ryan Nguyen
- * @version February 19th, 2022
+ * @version March 12, 2022
  */
 public class Motor 
 { 

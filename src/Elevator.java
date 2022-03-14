@@ -1,40 +1,128 @@
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
 /**
  * Elevator class that creates an elevator object which moves
  * from one floor to another based on the request. 
  *
- * @author Ryan Nguyen
- * @version February 19th, 2022
+ * @author Harrison Lee
+ * @version March 12, 2022
  */
 public class Elevator implements Runnable
 {
-		
-	private Scheduler scheduler;
-	
 	private Motor motor;
 	
 	private static final int TIME_BETWEEN_EACH_FLOOR = 3000;
 
 	private static final int TIME_TO_OPEN_CLOSE = 1000; 
 	
-	private int id, currentFloor, direction, destination;
+	private int id, currentFloor, direction, destination, sender;
 	
 	private boolean doorClosed;
+	
+	private DatagramPacket sendPacket;
+	private DatagramPacket receivePacket;
+	
+	private DatagramSocket sendReceiveSocket;
 
 	/**
-	 * Elevator Constructor.
+	 * Elevator Constructor
 	 * 
-	 * @param scheduler is the scheduler that assigns task to elevator.
 	 * @param id is the elevator ID.
 	 */
-	public Elevator(Scheduler scheduler, int id) 
+	public Elevator(int id) 
 	{
-		this.scheduler = scheduler;
 		this.id = id;
 		currentFloor = 1;
 		direction = 1;
 		doorClosed = false;
-		motor = new Motor();
+		motor = new Motor();                        
+
+	     try {
+	    	 sendReceiveSocket = new DatagramSocket(id);
+	     } catch (SocketException se) {   
+	     	se.printStackTrace();
+	     	System.exit(1);
+	     }			
 	}
+	
+	/**
+	 * Creates and sends datagram packets to send to the elevator controller
+	 * 
+	 * @param code is a list of bytes that is used to send messages between the elevator and elevator controller
+	 */
+	public void sendControl(byte code[]) {
+        try {
+            sendPacket = new DatagramPacket(code, code.length, InetAddress.getLocalHost(), sender);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+                System.exit(1);
+        }
+
+        try {
+            sendReceiveSocket.send(sendPacket);
+        } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+        }
+    }
+    
+	/**
+	 * Receives datagram packets from the elevator controller
+	 * 
+	 * @param 
+	 */
+    public void receiveControl() {
+          byte data[] = new byte[100];
+          receivePacket = new DatagramPacket(data, data.length);
+          
+          // Block until a datagram packet is received from receiveSocket.
+          try {        
+             sendReceiveSocket.receive(receivePacket);
+          } catch (IOException e) {
+             System.out.print("IO Exception: likely:");
+             System.out.println("Receive Socket Timed Out.\n" + e);
+             e.printStackTrace();
+             System.exit(1);
+          }
+          sender = receivePacket.getPort();
+          decodeControl(data);
+    }
+    
+    /**
+	 * Determines what the elevator will do depending on the code(instructions) it was sent  
+	 * 
+	 * @param msg is an array of bytes that is received from the controller
+	 */
+    public void decodeControl(byte[] msg) {
+        int code = msg[0];
+        switch (code) {
+        case 0: //Elevator doors have opened
+        	setDoor(!doorClosed);
+    		System.out.println("Elevator " + id + " door opened!");
+            break;
+        case 1: //Elevator doors have closed
+            setDoor(doorClosed);
+    		System.out.println("Elevator " + id + " door closed!");
+            break;
+        case 2: //Set elevator direction up
+        	setDirection(1);
+            System.out.println("Elevator " + id + " direction up");
+            break;
+        case 3://Set elevator direction down
+        	setDirection(0);
+            System.out.println("Elevator " + id + " direction down");
+            break;
+        case 4://Turn elevator motor on
+        	System.out.println("Elevator " + id + " motor on");
+        	turnOnMotor();
+            break;
+        }
+    }
 	
 	/**
 	 * Turns on the elevator motor.
@@ -61,7 +149,7 @@ public class Elevator implements Runnable
 			
 			// Decrement the floor to simulate going down a floor level,
 			// if the current floor is above the destination floor
-			if (temp > 0) 
+			if (direction == 0) 
 			{
 				currentFloor--;
 				
@@ -71,31 +159,33 @@ public class Elevator implements Runnable
 			}
 			
 			// Display the elevator traversing each floor to get to destination floor
-			System.out.println("Floor " + currentFloor + " detected Elevator");
+			System.out.println("Elevator " + id + " approaching floor " + currentFloor);
 			
-			// Call stopAtFloor when reach destination
-			scheduler.stopAtFloor(currentFloor, destination);
+			//Sends current floor data to controller 
+			byte arr[] = new byte[2];
+			arr[0] = (byte) 13;
+			arr[1] = (byte) currentFloor;
+			sendControl(arr);
+			
+			byte data[] = new byte[100];
+	        receivePacket = new DatagramPacket(data, data.length);
+	        
+	        // Block until a datagram packet is received from receiveSocket.
+	        try {        
+	        	sendReceiveSocket.receive(receivePacket);
+	        } catch (IOException e) {
+	            System.out.print("IO Exception: likely:");
+	            System.out.println("Receive Socket Timed Out.\n" + e);
+	            e.printStackTrace();
+	            System.exit(1);
+	        }
+	        if (data[0] == 5) {
+	        	System.out.println("Elevator " + id + " motor off");
+	        	System.out.println("Elevator " + id + " has arrived at floor " + currentFloor);
+	        	motor.toggleMotor(false);
+	        }
 		}
 
-	}
-	
-	/**
-	 * Once arrived at destination floor, turn the 
-	 * elevator motor off.
-	 */
-	public void arriveAtFloor() 
-	{
-		motor.toggleMotor(false);
-	}
-	
-	/**
-	 * Getter function for elevator motor.
-	 * 
-	 * @return The elevator motor.
-	 */
-	public Motor getMotor() 
-	{
-		return motor;
 	}
 	
 	/**
@@ -139,16 +229,6 @@ public class Elevator implements Runnable
 	}
 	
 	/**
-	 * Set the destination of the elevator.
-	 * 
-	 * @param floor is the destination floor.
-	 */
-	public void setDestination(int floor) 
-	{
-		destination = floor;
-	}
-	
-	/**
 	 * Get the direction the elevator is going.
 	 * 
 	 * @return The direction of the elevator either up (1) or down (0).
@@ -168,6 +248,21 @@ public class Elevator implements Runnable
 		this.direction = direction;
 	}
 	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		Thread elevator1 = new Thread(new Elevator(5000));
+		Thread elevator2 = new Thread(new Elevator(5001));
+		Thread elevator3 = new Thread(new Elevator(5002));
+		Thread elevator4 = new Thread(new Elevator(5003));
+	    
+		elevator1.start();
+		elevator2.start();
+		elevator3.start();
+		elevator4.start();
+	}
+    
 	@Override
 	/**
 	 * Runnable that runs the elevator thread.
@@ -176,12 +271,7 @@ public class Elevator implements Runnable
 	{	
 		while (true) 
 		{	
-			// Slow down the thread execution
-			try{
-				Thread.sleep(1000);
-			} catch (InterruptedException e){
-					
-			}
+			receiveControl();
 		}
 	}
 

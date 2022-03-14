@@ -1,3 +1,13 @@
+---------------------- Package ----------------------
+
+Communication Protocol.docx
+ElevatorProject
+README.txt
+elevator_math.xlsx
+Class Diagram
+Sequence Diagrams
+State Diagrams
+
 ---------------------- Description ----------------------
 
 Elevator system that reads and process an instruction file.
@@ -7,15 +17,18 @@ middle which takes the information provided by the floor and
 delivers it to the elevator. The elevator, also a client,
 gets the information and follows the instructions.
 
-Currently, in this iteration, the elevator moves based on the 
-instructions received from the scheduler. The scheduler receives
-these instructions from the floor based on the input file. Once
-the scheduler has the instruction, it determines order the 
-elevator moves in, what direction the elevator moves in, as well 
-as the floor that it will be moving towards. The elevator then 
-receives the instructions and moves based on those directions.
+In this iteration, floor, elevator, scheduler
+subsystem communicate with each other using UDP packets.
 
----------------------- Responsiblities ----------------------
+Currently, when running this program, the elevator system does
+not work properly as it does not always stop properly. 
+
+We made the decision to use most of our brain power to make the
+system work, but we were unable to. Therefore, we were unable to
+completely finish the tests and diagram component. These issues
+will be fix in the following iteration.
+
+---------------------- Responsibilities ----------------------
 
 A lot of the work was done together in a meeting with every 
 member. Everyone was providing input and aiding in the coding 
@@ -23,34 +36,29 @@ and design process. For the sake of dividing some of the work,
 each person was assigned tasks.
 
 Tyler
-	- TimeConverter Class
-	- README File
+	- Diagrams
 
 Aleksandar
-	- Scheduler Class
-	- SchedulerTest Class
+	- Scheduler subsystem
 
 Dominique
-	- UML Diagrams
-	- Sequence Diagrams
+	- Scheduler subsystem
 
 Ryan
-	- Elevator Class
-	- ElevatorTest Class
-	- FloorTest Class
+	- README file
+	- Document
+	- Test Classes
 
 Harrison
-	- State Diagrams
-	- Math File
+	- Elevator class 
+	- Floor class
 
 ---------------------- Classes ----------------------
 
 Elevator.java
 
 	Elevator class that creates an elevator object which moves
- 	from one floor to another based on the request. Using a motor,
-	it moves from floor to floor with a set time to move and time 
-	to open based on the instruction received from the scheduler.
+ 	from one floor to another based on the request. 
 
 Motor.java
 	
@@ -67,38 +75,48 @@ Scheduler.java
 Floor.java
 
 	The floor class is used to simulate the arrival of passengers
- 	to the elevators and simulating buttons being pressed. These instructions
-	get sent to the scheduler.
+ 	to the elevators and simulating buttons being pressed. 
 
 TimeConverter.java
 
 	The time converter class is utilized to centralize all time
 	time calculations. It converts the time string to ms or the time
 	in ms to a proper string displayed in HH:mm:ss.ms.
- 	 
-SchedulerTest.java
 	
-	Test class for the Scheulder class. It is testing if it can properly 
-	send the instruction to the elevator.
+FloorRequestHandler.java
 
-FloorTest.java
+	The FloorRequestHandler class receives UDP packets from
+  	the floor subsystem with the request and stores it in a list.
+ 	It provides a method to access the first request in the list.
+
+ElevatorController.java
 	
-	Test class for the Floor class. It is testing if it can properly read the
-	input file and store it.
+	ElevatorController is in charge of controlling its Elevator to fulfill the request of the passenger.
+   	ElevatorController communicates by receiving and sending  UDP messages to a well known port on it's Elevator.
+ 
+ElevatorControllerTest.java
+	
+	Test class for the ElevatorController class. It is testing if it the information from
+	the elevator is correct.
+
+FloorRequestHandlerTest.java
+	
+	Test class for the FloorRequestHandler class. It is testing if it receives the proper requests
 
 ElevatorTest.java
 	
 	Test class for the Elevator class. It is testing if the elevator moves properly,
 	as well as if it is going the proper direction.
 
-Main.java
-
-	The main class is used to run the elevator control system simulator. It creates
-	three threads, one for the floor, one for the elevator and one for the scheduler.
+MotorTest.java
+	
+	Test class for the Motor class. It is testing if the is on or off.
 
 ---------------------- Instructions ----------------------
 
 (For less wait time for outputs, you can change the values of 
 TIME_BETWEEN_EACH_FLOOR and TIME_TO_OPEN_CLOSE to something smaller.)
 
-1. Run Main.java
+1. Run Elevator.java
+2. Run Scheduler.java
+3. Run Floor.java

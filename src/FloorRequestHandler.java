@@ -4,32 +4,54 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+/**
+ * The FloorRequestHandler class receives UDP packets from
+ * the floor subsystem with the request and stores it in a list.
+ * It provides a method to access the first request in the list.
+ * 
+ * @author Aleksandar Veselinovic
+ * @version March 12, 2022
+ */
 public class FloorRequestHandler implements Runnable {
 
 	private DatagramSocket receiveSocket;
 	private DatagramPacket receivePacket;
 	private ArrayList<int[]> requests;
 
+	/**
+	 * Constructor of a Port object. Binds the DatagramSocket
+	 * to the specified port.
+	 * 
+	 * @param port the port number to bind the socket to
+	 */
 	public FloorRequestHandler(int port) {
 		requests = new ArrayList<int[]>();
 		try {
 			receiveSocket = new DatagramSocket(port);
 		} catch (SocketException se) {
 			se.printStackTrace();
-	        	System.exit(1);
+	        System.exit(1);
 		}
 	}
 
+	/**
+	 * This method receives a request from the floor
+	 * subsystem in a UDP packet and stores it in
+	 * a list.
+	 */
 	public synchronized void receiveRequest() {
+		//receive packet
 		byte data[] = new byte[100];
 		receivePacket = new DatagramPacket(data, data.length);
 	    
 		try { 
 			receiveSocket.receive(receivePacket);
-	       } catch (IOException e) {
-		          e.printStackTrace();
-		          System.exit(1);
-	       }
+	    } catch (IOException e) {
+	    	e.printStackTrace();
+	    	System.exit(1);
+	    }
+		
+		//convert UDP data into request
 		String requestString = new String(data, 0, receivePacket.getLength());
         String[] splitString = requestString.split(" ");
         
@@ -42,33 +64,46 @@ public class FloorRequestHandler implements Runnable {
         request[2] = splitString[2].equals("Up") ? 1 : 0;    //direction of elevator (up = 1, down = 0)
         request[3] = Integer.parseInt(splitString[3]);       //destination floor
         
+        //wait until the request list is empty to add the request to the list
+        while (!requests.isEmpty()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+			}
+		}
         requests.add(request);
-        System.out.println("Request Added");
-        System.out.println(request);
-        System.out.print("Sending request to scheduler at " + TimeConverter.msToTime(request[0]));
+        System.out.println("Scheduler received request!");
+        System.out.print(TimeConverter.msToTime(request[0]));
         String direction = request[2] == 1 ? "up" : "down";
-        System.out.print(" from floor " + request[1] + " to go " + direction + " to floor: " + request[3] + ".\n");
+        System.out.println(": From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
 
 		notifyAll();
 	}
 
-	
-	
-	
+	/**
+	 * This method removes and returns the first
+	 * request from the request list.
+	 * 
+	 * @return the request removed from the list
+	 */
 	public synchronized int[] getRequest() {
-		if (requests.isEmpty()) {
+		//wait until there is a request in the list
+		while (requests.isEmpty()) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
-
 			}
 		}
-		return requests.get(0);
+		notifyAll();
+		return requests.remove(0);
 	}
 
+	/**
+	 * When the thread runs it continually waits
+	 * for UDP packets from the floor subsystem.
+	 */
 	public void run() {
 		while (true) {
-			System.out.println("RequestHandler: Listening for requests");
 			receiveRequest();
 		}
 	}
