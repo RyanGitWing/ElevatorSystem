@@ -1,21 +1,18 @@
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+
 /**
  * Floor Request Handler Test Case.
  *
  * @author Ryan Nguyen
  * @version March 12, 2022
  */
-class FloorRequestHandlerTest {
-
-	@BeforeEach
-	void setUp() throws Exception {
-	}
+public class FloorRequestHandlerTest {
 
 	@Test
-	void testGetRequest() {
+	public void testGetRequest() {
 		Thread f = new Thread(new Floor());
 		FloorRequestHandler requestHandler = new FloorRequestHandler(4999);
 		Thread requestHandlerThread = new Thread(requestHandler);
@@ -28,5 +25,4 @@ class FloorRequestHandlerTest {
 		assertEquals(request[2], 1);
 		assertEquals(request[3], 4);
 	}
-
 }

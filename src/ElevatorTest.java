@@ -1,16 +1,18 @@
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.Test;
+
 /**
  * Elevator Test Case.
  *
  * @author Ryan Nguyen
  * @version March 12, 2022
  */
-class ElevatorTest 
-{
-	
+public class ElevatorTest {
+
 	@Test
-	void testSetDirection() 
+	public void testSetDirection() 
 	{
 		Elevator elevator = new Elevator(6006);
 
@@ -19,7 +21,7 @@ class ElevatorTest
 	}
 	
 	@Test
-	void testDecodeControl() 
+	public void testDecodeControl() 
 	{
 		Elevator elevator = new Elevator(8888);
 		byte []b = {2};
@@ -28,7 +30,7 @@ class ElevatorTest
 	}
 	
 	@Test
-	void testGetElevatorID() 
+	public void testGetElevatorID() 
 	{
 		Elevator elevator = new Elevator(7777);
 		assertEquals(elevator.getElevatorID(), 7777); 

@@ -16,9 +16,9 @@ public class Elevator implements Runnable
 {
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 3000;
+	private static final int TIME_BETWEEN_EACH_FLOOR = 300;
 
-	private static final int TIME_TO_OPEN_CLOSE = 1000; 
+	private static final int TIME_TO_OPEN_CLOSE = 100; 
 	
 	private int id, currentFloor, direction, destination, sender;
 	
@@ -254,13 +254,16 @@ public class Elevator implements Runnable
 	public static void main(String[] args) {
 		Thread elevator1 = new Thread(new Elevator(5000));
 		Thread elevator2 = new Thread(new Elevator(5001));
+		/*
 		Thread elevator3 = new Thread(new Elevator(5002));
 		Thread elevator4 = new Thread(new Elevator(5003));
-	    
+	    */
 		elevator1.start();
 		elevator2.start();
+		/*
 		elevator3.start();
 		elevator4.start();
+		*/
 	}
     
 	@Override
