@@ -73,6 +73,7 @@ public class ElevatorController implements Runnable {
 	 * @param request The passenger's request [time, source, direction, destination]
 	 */
 	public void executeRequest(int[] request) {
+		System.out.println("Starting Request");
 		activeJob = request;
 		inUse = true;
 		
@@ -99,6 +100,7 @@ public class ElevatorController implements Runnable {
 		//Move Elevator to destination floor
 		moveElevator(activeJob[3],activeJob[2]);
 		while (moving) {//Listen until elevator reaches destination
+			//System.out.println("Listening...");
 			receiveControl();
 		}// Elevator has reached the destination
 		inUse = false;
@@ -235,12 +237,35 @@ public class ElevatorController implements Runnable {
 			}
 			break;
 		}
-	}	
+	}
+	
+	public synchronized void addRequest(int[] Request) {
+		requests.add(Request);
+		notifyAll();
+	}
+	
+	public synchronized int[] getRequest() {
+		while (requests.isEmpty()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+			}
+		}
+		
+		return requests.remove(0);
+	}
 	
 	@Override
 	public void run() {
         while(true) {
-           
+        	//Insert code for execute request here
+        	//System.out.println(port + "Working...");
+        	/*if (!requests.isEmpty()) {
+        		executeRequest(requests.remove(0));
+        	} else {
+        		
+        	}*/
+        	executeRequest(getRequest());
         }
     }
 }
