@@ -4,6 +4,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Random;
 
 /**
  * Elevator class that creates an elevator object which moves
@@ -16,13 +17,16 @@ public class Elevator implements Runnable
 {
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 300;
+	private static final int TIME_BETWEEN_EACH_FLOOR = 1000;
 
 	private static final int TIME_TO_OPEN_CLOSE = 100; 
+
+	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
+	private final static int NUMELEVATORS = 2;
 	
-	private int id, currentFloor, direction, destination, sender;
+	private int id, currentFloor, direction, destination, sender, error;
 	
-	private boolean doorClosed;
+	private boolean doorClosed, working;
 	
 	private DatagramPacket sendPacket;
 	private DatagramPacket receivePacket;
@@ -40,7 +44,8 @@ public class Elevator implements Runnable
 		currentFloor = 1;
 		direction = 1;
 		doorClosed = false;
-		motor = new Motor();                        
+		working = true;
+		motor = new Motor();   
 
 	     try {
 	    	 sendReceiveSocket = new DatagramSocket(id);
@@ -100,26 +105,56 @@ public class Elevator implements Runnable
 	 */
     public void decodeControl(byte[] msg) {
         int code = msg[0];
-        switch (code) {
+        byte arr[] = new byte[2];
+        Random random = new Random();
+		error = random.nextInt(2);
+		
+        switch (code) 
+        {
         case 0: //Elevator doors have opened
-        	setDoor(!doorClosed);
-    		System.out.println("Elevator " + id + " door opened!");
+        	arr[0] = (byte) 6;
+        	
+        	if (error != 0) {
+        		arr[1] = (byte) 0;
+        		setDoor(!doorClosed);
+        		System.out.println("Elevator " + id + " door opened!");
+        	} else {
+        		arr[1] = (byte) 1;
+        	}
+        	
+        	sendControl(arr);
             break;
+            
         case 1: //Elevator doors have closed
-            setDoor(doorClosed);
-    		System.out.println("Elevator " + id + " door closed!");
+			arr[0] = (byte) 7;
+        	if (error != 0) {
+        		arr[1] = (byte) 0;
+        		setDoor(doorClosed);
+        		System.out.println("Elevator " + id + " door closed!");
+        	} else {
+        		arr[1] = (byte) 1;
+        	}
+        	sendControl(arr);
             break;
+            
         case 2: //Set elevator direction up
         	setDirection(1);
             System.out.println("Elevator " + id + " direction up");
             break;
+            
         case 3://Set elevator direction down
         	setDirection(0);
             System.out.println("Elevator " + id + " direction down");
             break;
+            
         case 4://Turn elevator motor on
         	System.out.println("Elevator " + id + " motor on");
         	turnOnMotor();
+            break;
+            
+        case 20: 
+        	sendReceiveSocket.disconnect();
+        	working = false;
             break;
         }
     }
@@ -137,12 +172,30 @@ public class Elevator implements Runnable
 		// Will keep moving until reaches destination floor
 		while (motor.getOn()) 
 		{
+			/*
 			int temp = currentFloor - destination;
 			int distanceBetweenFloor = Math.abs(temp);
+			*/
+			Random random = new Random();
+			error = random.nextInt(1000);
+			
+			if ( error == 0 ) {
+				motor.toggleMotor(false);
+				return;
+				/*
+				System.out.println("Elevator has exceeded time");
+				
+				//Sends current floor data to controller 
+				byte arr[] = new byte[2];
+				arr[0] = (byte) 13;
+				arr[1] = (byte) currentFloor;
+				sendControl(arr);
+				*/
+			}
 			
 			// Sleep the elevator thread for the time it takes to get to destination
 			try {
-				Thread.sleep(TIME_BETWEEN_EACH_FLOOR * distanceBetweenFloor);
+				Thread.sleep(TIME_BETWEEN_EACH_FLOOR);
 			} catch (InterruptedException e){
 				
 			}
@@ -252,18 +305,11 @@ public class Elevator implements Runnable
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Thread elevator1 = new Thread(new Elevator(5000));
-		Thread elevator2 = new Thread(new Elevator(5001));
-		/*
-		Thread elevator3 = new Thread(new Elevator(5002));
-		Thread elevator4 = new Thread(new Elevator(5003));
-	    */
-		elevator1.start();
-		elevator2.start();
-		/*
-		elevator3.start();
-		elevator4.start();
-		*/
+
+		for (int i = 0; i < NUMELEVATORS; i++) {
+			Thread elevator1 = new Thread(new Elevator(5000+i));
+			elevator1.start();
+		}
 	}
     
 	@Override
@@ -272,7 +318,7 @@ public class Elevator implements Runnable
 	 */
 	public void run() 
 	{	
-		while (true) 
+		while (working) 
 		{	
 			receiveControl();
 		}

@@ -1,15 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Scanner;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Scanner;
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * The floor class is used to simulate the arrival of passengers
@@ -18,7 +11,7 @@ import java.nio.file.Paths;
  * @author Harrison Lee
  * @version March 12, 2022
  */
-public class Floor implements Runnable{
+public class Floor implements Runnable {
     
 	private DatagramPacket sendPacket;	
 	private DatagramSocket controlSocket;

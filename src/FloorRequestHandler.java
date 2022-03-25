@@ -39,7 +39,7 @@ public class FloorRequestHandler implements Runnable {
 	 * subsystem in a UDP packet and stores it in
 	 * a list.
 	 */
-	public synchronized void receiveRequest() {
+	public void receiveRequest() {
 		//receive packet
 		byte data[] = new byte[100];
 		receivePacket = new DatagramPacket(data, data.length);
@@ -48,7 +48,7 @@ public class FloorRequestHandler implements Runnable {
 			receiveSocket.receive(receivePacket);
 	    } catch (IOException e) {
 	    	e.printStackTrace();
-	    	System.exit(1);
+	    	return;
 	    }
 		
 		//convert UDP data into request
@@ -64,7 +64,11 @@ public class FloorRequestHandler implements Runnable {
         request[2] = splitString[2].equals("Up") ? 1 : 0;    //direction of elevator (up = 1, down = 0)
         request[3] = Integer.parseInt(splitString[3]);       //destination floor
         
-        //wait until the request list is empty to add the request to the list
+        addRequest(request);
+	}
+
+	public synchronized void addRequest(int[] request) {
+	    //wait until the request list is empty to add the request to the list
         while (!requests.isEmpty()) {
 			try {
 				wait();
@@ -72,14 +76,12 @@ public class FloorRequestHandler implements Runnable {
 			}
 		}
         requests.add(request);
-        System.out.println("Scheduler received request!");
-        System.out.print(TimeConverter.msToTime(request[0]));
         String direction = request[2] == 1 ? "up" : "down";
-        System.out.println(": From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
-
+        System.out.println("Scheduler received request:\n" + TimeConverter.msToTime(request[0]) + ": From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
 		notifyAll();
+		
 	}
-
+	
 	/**
 	 * This method removes and returns the first
 	 * request from the request list.
@@ -94,8 +96,9 @@ public class FloorRequestHandler implements Runnable {
 			} catch (InterruptedException e) {
 			}
 		}
+		int request[] = requests.remove(0);
 		notifyAll();
-		return requests.remove(0);
+		return request;
 	}
 
 	/**
