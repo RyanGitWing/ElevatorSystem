@@ -15,7 +15,7 @@ public class Scheduler implements Runnable {
     //Offset for any port made 
 	private final static int PORTOFFSET = 5000;
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 2;
+	private final static int NUMELEVATORS = 6;
     //List of elevator controller objects
     private ArrayList<ElevatorController> controllers;
     //Floor Request Handler object
@@ -48,23 +48,17 @@ public class Scheduler implements Runnable {
     	requestHandler = frh;
     }
     
+    /**
+     * Starts floor request handler threads
+     */
     public void startHandler() {
     	Thread requestHandlerThread = new Thread(requestHandler);
     	requestHandlerThread.start();
     }
 
     /**
-     * Create a elevator controller with the defined port
-     * 
-     * @param port integer that holds the port
+     * Starts controller threads
      */
-    private void createController(int port) {
-        ElevatorController controller = new ElevatorController(port);
-        controllers.add(controller);
-        Thread controllerthread = new Thread(controller);
-        controllerthread.start();     
-    }
-    
     public void startControllers() {
     	for (int i = 0; i < controllers.size(); i++) {
     		Thread controllerthread = new Thread(controllers.get(i));
@@ -109,13 +103,9 @@ public class Scheduler implements Runnable {
     public static void main(String[] args) {
         Scheduler scheduler = new Scheduler(NUMELEVATORS);
         Thread schedulerThread = new Thread(scheduler);
-        //FloorRequestHandler requestHandler = new FloorRequestHandler(4999);
-        //scheduler.addHandler(requestHandler);
-        //Thread requestHandlerThread = new Thread(requestHandler);
         schedulerThread.start();
         scheduler.startHandler();
         scheduler.startControllers();
-        //requestHandlerThread.start();
     }
     
     /**
@@ -128,10 +118,23 @@ public class Scheduler implements Runnable {
             int[] request = requestHandler.getRequest();
             
             int elevatorPort = getElevator(request[1]);
-            System.out.println("Scheduler using Elevator " + elevatorPort + " to execute request " + request[1] + "," + request[3]);
+            System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler using Elevator " + elevatorPort + " to execute request " + request[1] + "," + request[3]);
             //instead of execute request, simply addRequest to elevatorcontroller thread
             //controllers.get(elevatorPort - PORTOFFSET).executeRequest(request);
             controllers.get(elevatorPort - PORTOFFSET).addRequest(request);
         }
     }
+    
+    /**
+     * CURRENTLY UNUSED - MAY BE NEEDED FOR FUTURE REFERENCE
+     * Create a elevator controller with the defined port
+     * 
+     * @param port integer that holds the port
+     
+    private void createController(int port) {
+        ElevatorController controller = new ElevatorController(port);
+        controllers.add(controller);
+        Thread controllerthread = new Thread(controller);
+        controllerthread.start();     
+    }*/
 }

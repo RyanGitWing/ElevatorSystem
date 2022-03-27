@@ -35,6 +35,26 @@ public class FloorRequestHandler implements Runnable {
 	}
 
 	/**
+	 * Adds requests to ArrayList that contains the floor information.
+	 *  
+	 *  @param request The passenger's request [time, source, direction, destination]
+	 */
+	public synchronized void addRequest(int[] request) {
+	    //wait until the request list is empty to add the request to the list
+        while (!requests.isEmpty()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+			}
+		}
+        requests.add(request);
+        String direction = request[2] == 1 ? "up" : "down";
+        System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler received request:" + " From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
+		notifyAll();
+		
+	}
+	
+	/**
 	 * This method receives a request from the floor
 	 * subsystem in a UDP packet and stores it in
 	 * a list.
@@ -65,21 +85,6 @@ public class FloorRequestHandler implements Runnable {
         request[3] = Integer.parseInt(splitString[3]);       //destination floor
         
         addRequest(request);
-	}
-
-	public synchronized void addRequest(int[] request) {
-	    //wait until the request list is empty to add the request to the list
-        while (!requests.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-			}
-		}
-        requests.add(request);
-        String direction = request[2] == 1 ? "up" : "down";
-        System.out.println("Scheduler received request:\n" + TimeConverter.msToTime(request[0]) + ": From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
-		notifyAll();
-		
 	}
 	
 	/**

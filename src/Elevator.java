@@ -17,12 +17,12 @@ public class Elevator implements Runnable
 {
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 1000;
+	private static final int TIME_BETWEEN_EACH_FLOOR = 100;
 
-	private static final int TIME_TO_OPEN_CLOSE = 100; 
+	private static final int TIME_TO_OPEN_CLOSE = 50; 
 
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 2;
+	private final static int NUMELEVATORS = 6;
 	
 	private int id, currentFloor, direction, destination, sender, error;
 	
@@ -46,7 +46,7 @@ public class Elevator implements Runnable
 		doorClosed = false;
 		working = true;
 		motor = new Motor();   
-
+		sender = 9823;
 	     try {
 	    	 sendReceiveSocket = new DatagramSocket(id);
 	     } catch (SocketException se) {   
@@ -107,7 +107,7 @@ public class Elevator implements Runnable
         int code = msg[0];
         byte arr[] = new byte[2];
         Random random = new Random();
-		error = random.nextInt(2);
+		error = random.nextInt(5); //20% chance of faulting
 		
         switch (code) 
         {
@@ -116,8 +116,8 @@ public class Elevator implements Runnable
         	
         	if (error != 0) {
         		arr[1] = (byte) 0;
-        		setDoor(!doorClosed);
-        		System.out.println("Elevator " + id + " door opened!");
+        		setDoor(true);
+        		System.out.println("Elevator " + (id-5000) + " door opened!");
         	} else {
         		arr[1] = (byte) 1;
         	}
@@ -129,8 +129,8 @@ public class Elevator implements Runnable
 			arr[0] = (byte) 7;
         	if (error != 0) {
         		arr[1] = (byte) 0;
-        		setDoor(doorClosed);
-        		System.out.println("Elevator " + id + " door closed!");
+        		setDoor(false);
+        		System.out.println("Elevator " + (id-5000) + " door closed!");
         	} else {
         		arr[1] = (byte) 1;
         	}
@@ -139,16 +139,16 @@ public class Elevator implements Runnable
             
         case 2: //Set elevator direction up
         	setDirection(1);
-            System.out.println("Elevator " + id + " direction up");
+            System.out.println("Elevator " + (id-5000) + " direction up");
             break;
             
         case 3://Set elevator direction down
         	setDirection(0);
-            System.out.println("Elevator " + id + " direction down");
+            System.out.println("Elevator " + (id-5000) + " direction down");
             break;
             
         case 4://Turn elevator motor on
-        	System.out.println("Elevator " + id + " motor on");
+        	System.out.println("Elevator " + (id-5000) + " motor on");
         	turnOnMotor();
             break;
             
@@ -177,7 +177,7 @@ public class Elevator implements Runnable
 			int distanceBetweenFloor = Math.abs(temp);
 			*/
 			Random random = new Random();
-			error = random.nextInt(1000);
+			error = random.nextInt(5); //20% chance of faulting
 			
 			if ( error == 0 ) {
 				motor.toggleMotor(false);
@@ -212,7 +212,7 @@ public class Elevator implements Runnable
 			}
 			
 			// Display the elevator traversing each floor to get to destination floor
-			System.out.println("Elevator " + id + " approaching floor " + currentFloor);
+			System.out.println("Elevator " + (id-5000) + " approaching floor " + currentFloor);
 			
 			//Sends current floor data to controller 
 			byte arr[] = new byte[2];
@@ -233,8 +233,8 @@ public class Elevator implements Runnable
 	            System.exit(1);
 	        }
 	        if (data[0] == 5) {
-	        	System.out.println("Elevator " + id + " motor off");
-	        	System.out.println("Elevator " + id + " has arrived at floor " + currentFloor);
+	        	System.out.println("Elevator " + (id-5000) + " motor off");
+	        	System.out.println("Elevator " + (id-5000) + " has arrived at floor " + currentFloor);
 	        	motor.toggleMotor(false);
 	        }
 		}
@@ -260,6 +260,36 @@ public class Elevator implements Runnable
 		doorClosed = closeDoor;
 		
 	}
+
+	public boolean getDoor(){
+		return doorClosed;
+	}
+	
+	/**
+	 * Set the direction of the elevator.
+	 * 
+	 * @param direction is the direction the elevator will go.
+	 */
+	public void setDirection(int direction)
+	{
+		this.direction = direction;
+	}
+	
+	/**
+	 * Get the direction the elevator is going.
+	 * 
+	 * @return The direction of the elevator either up (1) or down (0).
+	 */
+	public int getDirection() 
+	{
+		return direction;
+	}
+
+	
+
+	public int getError(){
+		return error;
+	}
 	
 	/**
 	 * Get the elevator ID.
@@ -281,25 +311,7 @@ public class Elevator implements Runnable
 		return currentFloor;
 	}
 	
-	/**
-	 * Get the direction the elevator is going.
-	 * 
-	 * @return The direction of the elevator either up (1) or down (0).
-	 */
-	public int getDirection() 
-	{
-		return direction;
-	}
-
-	/**
-	 * Set the direction of the elevator.
-	 * 
-	 * @param direction is the direction the elevator will go.
-	 */
-	public void setDirection(int direction)
-	{
-		this.direction = direction;
-	}
+	
 	
 	/**
 	 * @param args

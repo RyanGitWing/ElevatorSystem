@@ -26,5 +26,25 @@ public class ElevatorControllerTest {
 		assertEquals(req[2], 1);
 		assertEquals(req[3], 0);
 	}
+	
+	@Test
+	public void testFloorToVisit() {
+		ElevatorController ec = new ElevatorController(9010);
+		int[] req = ec.getInfo();
+		ec.addRequest(req);
+		int[] firstReq = ec.getFloorsToVisit(0);
+		int[] secReq = ec.getFloorsToVisit(1);
+		assertEquals(req[1],firstReq[0]);
+		assertEquals(req[3],secReq[0]);
+	}
+	
+	@Test
+	public void testInUse() {
+		ElevatorController ec = new ElevatorController(9010);
+		int[] req = ec.getInfo();
+		ec.addRequest(req);
+		ec.setInUse();
+		assertTrue(ec.getInUse());
+	}
 
 }
