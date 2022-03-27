@@ -1,3 +1,4 @@
+package Subsystems;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -8,8 +9,8 @@ import java.net.*;
  * The floor class is used to simulate the arrival of passengers
  * to the elevators and simulating buttons being pressed.
  *
- * @author Harrison Lee
- * @version March 12, 2022
+ * @author Group2
+ * @version March 27, 2022
  */
 public class Floor implements Runnable {
     
@@ -99,6 +100,6 @@ public class Floor implements Runnable {
      */
     @Override
     public void run(){
-    	readInput(new File("src\\inputFile.txt"));
+    	readInput(new File(".\\Documents\\inputFile.txt"));
     }
 }

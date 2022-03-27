@@ -1,16 +1,18 @@
+package Tests;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.Test;
-import org.junit.jupiter.api.TestFactory;
+import Subsystems.Elevator;
+import Subsystems.Motor;
 
 /**
  * Elevator Test Case.
  *
- * @author Ryan Nguyen
- * @version March 12, 2022
+ * @author Group2
+ * @version March 27, 2022
  */
 public class ElevatorTest {
 
@@ -43,7 +45,6 @@ public class ElevatorTest {
 	public void testMovingFault(){
 		Elevator elevator =  new Elevator(9999);
 		Motor motor =  new Motor();
-		ElevatorController ec = new ElevatorController(9999);
 		byte []b = {4};
 		while(true){
 			elevator.decodeControl(b);
@@ -53,7 +54,7 @@ public class ElevatorTest {
 				assertFalse(motor.getOn());
 				return;
 			} else {
-				assertTrue(elevator.getDoor());
+				assertTrue(motor.getOn());
 				return;
 
 			}

@@ -1,3 +1,4 @@
+package Subsystems;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -6,8 +7,8 @@ import java.util.ArrayList;
  * ElevatorController is in charge of controlling its Elevator to fulfill the request of the passenger.
  * ElevatorController communicates by receiving and sending  UDP messages to a well known port on it's Elevator.
  * 
- * @author Dominique Giguere Samson
- * @version March 12, 2022
+ * @author Group2
+ * @version March 27, 2022
  *
  */
 public class ElevatorController implements Runnable {
@@ -24,7 +25,7 @@ public class ElevatorController implements Runnable {
 	//elevatorInfo = [current floor, direction, dest floor,# passengers]
 	private int[] elevatorInfo;
 	//inUse is true when the controller is executing a request;
-	boolean inUse, working;
+	private boolean inUse, working;
 
 	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out]
 	//{[1,1,0],[7,0,1],[3,1,0],[5,0,1]}
@@ -100,7 +101,7 @@ public class ElevatorController implements Runnable {
 	    	 }
 	         sendReceiveSocket.receive(receivePacket);
 	      } catch (SocketTimeoutException se) {
-	    	  System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Scheduler has detected that Elevator " + (port-5000) + " has exceeded the expected travel time. The elevator has been disabled.\n");
+	    	  System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Scheduler has detected that Elevator " + (port-4999) + " has exceeded the expected travel time. The elevator has been disabled.\n");
 	    	  sendControl((byte) 20);
 	    	  working = false;
 	    	  return;
@@ -122,7 +123,7 @@ public class ElevatorController implements Runnable {
 		case 6: //Elevator doors have opened
 			if (msg[1] == 1) {
 				try {
-					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-5000) + " door");
+					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-4999) + " door");
 					Thread.sleep(2000);
 					sendControl((byte) 0);
 					receiveControl(false);
@@ -130,13 +131,13 @@ public class ElevatorController implements Runnable {
 					e.printStackTrace();
 				}
 			} else {
-				System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-5000) + " Door open");
+				System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " Door open");
 			}
 			break;
 		case 7: //Elevator doors have closed
 			if (msg[1] == 1) {
 				try {
-					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-5000) + " door");
+					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-4999) + " door");
 					Thread.sleep(2000);
 					sendControl((byte) 1);
 					receiveControl(false);
@@ -144,32 +145,32 @@ public class ElevatorController implements Runnable {
 					e.printStackTrace();
 				}
 			} else {
-				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Door close");
+				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Door close");
 			}
 			break;
 		case 8: //Elevator motor is powered on
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Motor on");
+			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Motor on");
 			break;
 		case 9://Elevator motor is powered off
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Motor off");
+			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Motor off");
 			break;
 		case 10://Elevator has set new destination
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Destination Set");
+			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Destination Set");
 			break;
 		case 11://Passenger has entered the elevator
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Passenger Entered");
+			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Passenger Entered");
 			break;
 		case 12://Passenger has left the elevator
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Passenger Left");
+			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Passenger Left");
 			break;
 		case 13://Elevator has changed to a new floor
-			System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-5000) + " arrived at floor " + msg[1] + ", destination: " + elevatorInfo[2]);
+			System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " arrived at floor " + msg[1] + ", destination: " + elevatorInfo[2]);
 			elevatorInfo[0] = msg[1];//Update current floor
 			if(elevatorInfo[0]==elevatorInfo[2]) { //Check if the elevator has reached its destination
-				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Stop");
+				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Stop");
 				stopElevator(); // Elevator has reached destination
 			} else {
-				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-5000) + " Continue");
+				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Continue");
 				sendControl((byte) 15); // Do not stop
 			}
 			break;
@@ -181,9 +182,9 @@ public class ElevatorController implements Runnable {
 	 */
 	public void stopElevator() {
 		sendControl((byte) 5);//Stop elevator's motor
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-5000) + " to turn off motor.");
+		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to turn off motor.");
 		moving = false;
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-5000) + " to open door.");
+		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to open door.");
 		sendControl((byte) 0);//Open elevator's doors
 		receiveControl(false);
 		if (floorsToVisit.isEmpty()) {
@@ -199,14 +200,14 @@ public class ElevatorController implements Runnable {
 	 */
 	public void moveElevator(int direction) {
 		int newDirection = direction == 1 ? 2 : 3;//2: Direction up, 3: Direction Down
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-5000) + " to close door.");
+		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to close door.");
 		sendControl((byte) 1); //close doors
 		receiveControl(false);
 		//sendControl((byte) (100+destination)); //set elevator destination
         String directionString = direction == 1 ? "up" : "down";
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-5000) + " to go " + directionString);
+		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to go " + directionString);
 		sendControl((byte) newDirection); //set elevator direction
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-5000) + " to turn on motor \n");
+		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to turn on motor \n");
 		sendControl((byte) 4); //turn on motor
 		moving = true;
 	}

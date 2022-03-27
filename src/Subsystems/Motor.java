@@ -1,9 +1,10 @@
+package Subsystems;
 /**
  * Motor class that creates an motor object which
  * turns the elevator motor on and off.
  *
- * @author Ryan Nguyen
- * @version March 12, 2022
+ * @author Group2
+ * @version March 27, 2022
  */
 public class Motor 
 { 

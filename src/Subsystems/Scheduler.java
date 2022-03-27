@@ -1,3 +1,4 @@
+package Subsystems;
 import java.util.ArrayList;
 /**
  * The Scheduler class takes requests from the floor subsystem
@@ -5,8 +6,8 @@ import java.util.ArrayList;
  * the elevator to move to the floor where the request was made and then
  * commanding the elevator to move to the passenger's destination floor.
  * 
- * @author Aleksandar Veselinovic, Dominique Giguere Samson
- * @version March 12, 2022
+ * @author Group2
+ * @version March 27, 2022
  *
  */
 
@@ -15,7 +16,7 @@ public class Scheduler implements Runnable {
     //Offset for any port made 
 	private final static int PORTOFFSET = 5000;
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 6;
+	private final static int NUMELEVATORS = 4;
     //List of elevator controller objects
     private ArrayList<ElevatorController> controllers;
     //Floor Request Handler object
@@ -118,7 +119,7 @@ public class Scheduler implements Runnable {
             int[] request = requestHandler.getRequest();
             
             int elevatorPort = getElevator(request[1]);
-            System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler using Elevator " + elevatorPort + " to execute request " + request[1] + "," + request[3]);
+            System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler using Elevator " + (elevatorPort - 4999) + " to execute request " + request[1] + "," + request[3]);
             //instead of execute request, simply addRequest to elevatorcontroller thread
             //controllers.get(elevatorPort - PORTOFFSET).executeRequest(request);
             controllers.get(elevatorPort - PORTOFFSET).addRequest(request);

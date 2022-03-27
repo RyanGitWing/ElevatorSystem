@@ -1,3 +1,4 @@
+package Subsystems;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,19 +11,19 @@ import java.util.Random;
  * Elevator class that creates an elevator object which moves
  * from one floor to another based on the request. 
  *
- * @author Harrison Lee
- * @version March 12, 2022
+ * @author Group2
+ * @version March 27, 2022
  */
 public class Elevator implements Runnable
 {
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 100;
+	private static final int TIME_BETWEEN_EACH_FLOOR = 90;
 
-	private static final int TIME_TO_OPEN_CLOSE = 50; 
+	private static final int TIME_TO_OPEN_CLOSE = 10; 
 
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 6;
+	private final static int NUMELEVATORS = 4;
 	
 	private int id, currentFloor, direction, destination, sender, error;
 	
@@ -107,7 +108,7 @@ public class Elevator implements Runnable
         int code = msg[0];
         byte arr[] = new byte[2];
         Random random = new Random();
-		error = random.nextInt(5); //20% chance of faulting
+		error = random.nextInt(2); //20% chance of faulting
 		
         switch (code) 
         {
@@ -117,7 +118,7 @@ public class Elevator implements Runnable
         	if (error != 0) {
         		arr[1] = (byte) 0;
         		setDoor(true);
-        		System.out.println("Elevator " + (id-5000) + " door opened!");
+        		System.out.println("Elevator " + (id-4999) + " door opened!");
         	} else {
         		arr[1] = (byte) 1;
         	}
@@ -130,7 +131,7 @@ public class Elevator implements Runnable
         	if (error != 0) {
         		arr[1] = (byte) 0;
         		setDoor(false);
-        		System.out.println("Elevator " + (id-5000) + " door closed!");
+        		System.out.println("Elevator " + (id-4999) + " door closed!");
         	} else {
         		arr[1] = (byte) 1;
         	}
@@ -139,16 +140,18 @@ public class Elevator implements Runnable
             
         case 2: //Set elevator direction up
         	setDirection(1);
-            System.out.println("Elevator " + (id-5000) + " direction up");
+            System.out.println("Elevator " + (id-4999) + " direction up");
+            System.out.println("Elevator " + (id-4999) + " up direction button on");
             break;
             
         case 3://Set elevator direction down
         	setDirection(0);
-            System.out.println("Elevator " + (id-5000) + " direction down");
+            System.out.println("Elevator " + (id-4999) + " direction down");
+            System.out.println("Elevator " + (id-4999) + " down direction button on");
             break;
             
         case 4://Turn elevator motor on
-        	System.out.println("Elevator " + (id-5000) + " motor on");
+        	System.out.println("Elevator " + (id-4999) + " motor on");
         	turnOnMotor();
             break;
             
@@ -177,7 +180,7 @@ public class Elevator implements Runnable
 			int distanceBetweenFloor = Math.abs(temp);
 			*/
 			Random random = new Random();
-			error = random.nextInt(5); //20% chance of faulting
+			error = random.nextInt(2); //20% chance of faulting
 			
 			if ( error == 0 ) {
 				motor.toggleMotor(false);
@@ -212,7 +215,7 @@ public class Elevator implements Runnable
 			}
 			
 			// Display the elevator traversing each floor to get to destination floor
-			System.out.println("Elevator " + (id-5000) + " approaching floor " + currentFloor);
+			System.out.println("Elevator " + (id-4999) + " approaching floor " + currentFloor);
 			
 			//Sends current floor data to controller 
 			byte arr[] = new byte[2];
@@ -233,8 +236,8 @@ public class Elevator implements Runnable
 	            System.exit(1);
 	        }
 	        if (data[0] == 5) {
-	        	System.out.println("Elevator " + (id-5000) + " motor off");
-	        	System.out.println("Elevator " + (id-5000) + " has arrived at floor " + currentFloor);
+	        	System.out.println("Elevator " + (id-4999) + " motor off");
+	        	System.out.println("Elevator " + (id-4999) + " has arrived at floor " + currentFloor);
 	        	motor.toggleMotor(false);
 	        }
 		}
