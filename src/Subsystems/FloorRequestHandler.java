@@ -97,10 +97,8 @@ public class FloorRequestHandler implements Runnable {
 	public synchronized int[] getRequest() {
 		//wait until there is a request in the list
 		while (requests.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-			}
+			int[] empty = {-1};
+			return empty;
 		}
 		int request[] = requests.remove(0);
 		notifyAll();

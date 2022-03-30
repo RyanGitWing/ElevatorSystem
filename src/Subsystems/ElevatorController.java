@@ -26,7 +26,8 @@ public class ElevatorController implements Runnable {
 	private int[] elevatorInfo;
 	//inUse is true when the controller is executing a request;
 	private boolean inUse, working;
-
+	//Is the elevator broken?
+	private int fault;
 	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out]
 	//{[1,1,0],[7,0,1],[3,1,0],[5,0,1]}
 	
@@ -124,6 +125,7 @@ public class ElevatorController implements Runnable {
 			if (msg[1] == 1) {
 				try {
 					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-4999) + " door");
+					fault = 1; //Set fault to true
 					Thread.sleep(2000);
 					sendControl((byte) 0);
 					receiveControl(false);
@@ -132,12 +134,14 @@ public class ElevatorController implements Runnable {
 				}
 			} else {
 				System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " Door open");
+				fault = 0;//Set fault to false
 			}
 			break;
 		case 7: //Elevator doors have closed
 			if (msg[1] == 1) {
 				try {
 					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-4999) + " door");
+					fault = 1;//Set fault to true
 					Thread.sleep(2000);
 					sendControl((byte) 1);
 					receiveControl(false);
@@ -146,6 +150,7 @@ public class ElevatorController implements Runnable {
 				}
 			} else {
 				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Door close");
+				fault = 0; //Set fault to false
 			}
 			break;
 		case 8: //Elevator motor is powered on
@@ -300,6 +305,14 @@ public class ElevatorController implements Runnable {
 	 */
 	public int[] getInfo() {
 		return elevatorInfo;
+	}
+	
+	public int getFault() {
+		return fault;
+	}
+	
+	public boolean getMoving() {
+		return moving;
 	}
 	
 	@Override
