@@ -78,12 +78,13 @@ public class FloorRequestHandler implements Runnable {
         
         int convertedTime = TimeConverter.timeToMS(splitString[0]);	            
         
-        int[] request = new int[4];
+        int[] request = new int[5];
         
         request[0] = convertedTime;                          //time in ms
         request[1] = Integer.parseInt(splitString[1]);       //source floor
         request[2] = splitString[2].equals("Up") ? 1 : 0;    //direction of elevator (up = 1, down = 0)
         request[3] = Integer.parseInt(splitString[3]);       //destination floor
+        request[4] = Integer.parseInt(splitString[4]);       //type of fault
         
         addRequest(request);
 	}

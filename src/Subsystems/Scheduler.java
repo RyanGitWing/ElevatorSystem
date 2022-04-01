@@ -25,6 +25,7 @@ public class Scheduler implements Runnable {
     private ArrayList<int[]> elevatorDisplayStats;
     //Gui drawer
     private GUI gui;
+    private int defaultPort;
     /**
      * Constructor of a Scheduler object.
      * 
@@ -35,6 +36,7 @@ public class Scheduler implements Runnable {
     	requestHandler = new FloorRequestHandler(4999);
         controllers = new ArrayList<ElevatorController>();
         elevatorDisplayStats = new ArrayList<int[]>();
+        defaultPort = PORTOFFSET;
         gui = new GUI();
         for (int i = 0; i < numElevators; i++) {
             //createController(PORTOFFSET+i);
@@ -84,7 +86,7 @@ public class Scheduler implements Runnable {
      */
     public int getElevator(int destination) {
         int closestElevator = 1000;
-        int port = PORTOFFSET;
+        int port = defaultPort;
         boolean isEligible = false;
         for (ElevatorController controller : controllers) {
         	int[] elevatorInfo = controller.getInfo();
@@ -98,6 +100,8 @@ public class Scheduler implements Runnable {
                 port = controller.getPort();
             }
         }
+        defaultPort++;
+        if (defaultPort == 5004) defaultPort = 5000;
         return port;
     }
     
