@@ -18,12 +18,12 @@ public class Elevator implements Runnable
 {
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 90;
+	private static final int TIME_BETWEEN_EACH_FLOOR = 100;
 
 	private static final int TIME_TO_OPEN_CLOSE = 10; 
 
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 4;
+	private final static int NUMELEVATORS = 2;
 	
 	private int id, currentFloor, direction, destination, sender, error;
 	
@@ -108,7 +108,7 @@ public class Elevator implements Runnable
         int code = msg[0];
         byte arr[] = new byte[2];
         Random random = new Random();
-		error = random.nextInt(2); //20% chance of faulting
+		error = random.nextInt(1); //20% chance of faulting, change to 1 for guaranteed failure
 		
         switch (code) 
         {
@@ -180,7 +180,7 @@ public class Elevator implements Runnable
 			int distanceBetweenFloor = Math.abs(temp);
 			*/
 			Random random = new Random();
-			error = random.nextInt(2); //20% chance of faulting
+			error = random.nextInt(1); //20% chance of faulting, change to 1 for guaranteed failure
 			
 			if ( error == 0 ) {
 				motor.toggleMotor(false);

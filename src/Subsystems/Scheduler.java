@@ -16,7 +16,7 @@ public class Scheduler implements Runnable {
     //Offset for any port made 
 	private final static int PORTOFFSET = 5000;
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 4;
+	private final static int NUMELEVATORS = 2;
     //List of elevator controller objects
     private ArrayList<ElevatorController> controllers;
     //Floor Request Handler object
