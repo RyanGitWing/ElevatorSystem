@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.Test;
 import Subsystems.Elevator;
-import Subsystems.Motor;
 
 /**
  * Elevator Test Case.
