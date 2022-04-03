@@ -1,21 +1,21 @@
 package Subsystems;
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.*; 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * ElevatorController is in charge of controlling its Elevator to fulfill the request of the passenger.
  * ElevatorController communicates by receiving and sending  UDP messages to a well known port on it's Elevator.
  * 
  * @author Group2
- * @version March 27, 2022
- *
+ * @version April 12, 2022
  */
 public class ElevatorController implements Runnable {
 
 	//Request Queue
 	private ArrayList<int[]> requests; //[time, source, dir, dest]
-	private int[] activeJob;
 	private DatagramSocket sendReceiveSocket;
 	private DatagramPacket receivePacket, sendPacket;
  	//Port of Elevator
@@ -27,12 +27,14 @@ public class ElevatorController implements Runnable {
 	//inUse is true when the controller is executing a request;
 	private boolean inUse, working;
 	private boolean doorStuckFault, elevatorStuckFault;
-	//Is the elevator broken?
 	private int fault;
 	private ArrayList<Integer> faultList;
 	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out, fault]
-	//{[1,1,0,0],[7,0,1,0],[3,1,0,0],[5,0,1,0]}
-
+	
+	private LocalTime time = LocalTime.now();
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+    private String fTime  = time.format(formatter);
+	
 	/**
 	 * Constructor of ElevatorController class.
 	 *
@@ -45,8 +47,6 @@ public class ElevatorController implements Runnable {
 		floorsToVisit = new ArrayList<int[]>();
 		faultList = new ArrayList<Integer>();
 		fault = 0;
-		//doorStuckFault = false;
-		//elevatorStuckFault = false;
 		
 		//Create DatagramSocket
 		try {
@@ -61,15 +61,13 @@ public class ElevatorController implements Runnable {
 		working = true;
 		
 		//Elevators are initialized with floor 1, direction up, destination 1, 0 passengers
-		elevatorInfo = new int[4];
+		elevatorInfo = new int[5];
 		elevatorInfo[0]=1; //floor
 		elevatorInfo[1]=1; //direction
 		elevatorInfo[2]=1; //destination
 		elevatorInfo[3]=0; //passengers
 	}
 	
-	
-
 	/**
 	 * Sends a control message to the Elevator
 	 * 
@@ -119,36 +117,37 @@ public class ElevatorController implements Runnable {
 		int code = msg[0];
 		switch (code) {
 		case 6: //Elevator doors have opened
-			System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " Door open");
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Door open");
 			fault = 0;
 			break;
 		case 7: //Elevator doors have closed
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Door close");
+			System.out.println(fTime  + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Door close");
 			fault = 0;
 			break;
 		case 8: //Elevator motor is powered on
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Motor on");
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Motor on");
 			break;
 		case 9://Elevator motor is powered off
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Motor off");
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Motor off");
 			break;
 		case 10://Elevator has set new destination
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Destination Set");
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Destination Set");
 			break;
 		case 11://Passenger has entered the elevator
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Passenger Entered");
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Passenger Entered");
 			break;
 		case 12://Passenger has left the elevator
-			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Passenger Left");
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Passenger Left");
 			break;
 		case 13://Elevator has changed to a new floor
-			System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " arrived at floor " + msg[1] + ", destination: " + elevatorInfo[2]);
+			System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Arrival sensor has detected Elevator " + (port-4999) + " at floor " + msg[1] + ", destination: " + elevatorInfo[2]);
 			elevatorInfo[0] = msg[1];//Update current floor
 			if(elevatorInfo[0]==elevatorInfo[2]) { //Check if the elevator has reached its destination
-				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Stop");
+				System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Stop");
+				System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Floor " + elevatorInfo[2] + " lamp turned off");
 				stopElevator(); // Elevator has reached destination
 			} else {
-				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Continue");
+				System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Elevator " + (port-4999) + " Continue");
 				sendControl((byte) 15); // Do not stop
 			}
 			break;
@@ -160,9 +159,9 @@ public class ElevatorController implements Runnable {
 	 */
 	public void stopElevator() {
 		sendControl((byte) 5);//Stop elevator's motor
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to turn off motor.");
+		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to turn off motor.");
 		moving = false;
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to open door.");
+		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to open door.");
 		sendControl((byte) 0);//Open elevator's doors
 		if (floorsToVisit.isEmpty()) {
 			inUse = false;
@@ -177,7 +176,7 @@ public class ElevatorController implements Runnable {
 	 */
 	public void moveElevator(int direction) {
 		int newDirection = direction == 1 ? 2 : 3;//2: Direction up, 3: Direction Down
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to close door.");
+		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to close door.");
 		if (doorStuckFault) {
 			sendControl((byte) 21);//close doors fault
 			fault = 1;
@@ -185,11 +184,11 @@ public class ElevatorController implements Runnable {
 		} else {
 			sendControl((byte) 1); //close doors
 		}
-		//sendControl((byte) (100+destination)); //set elevator destination
+
         String directionString = direction == 1 ? "up" : "down";
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to go " + directionString);
+		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to go " + directionString);
 		sendControl((byte) newDirection); //set elevator direction
-		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to turn on motor \n");
+		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to turn on motor \n");
 		sendControl((byte) 4); //turn on motor
 		moving = true;
 	}
@@ -200,8 +199,6 @@ public class ElevatorController implements Runnable {
 	 *  @param request The passenger's request [time, source, direction, destination]
 	 */
 	public synchronized void addRequest(int[] request) {
-		activeJob = request;
-
 		int[] pickUp = new int[4];
 		pickUp[0] = request[1];
 		pickUp[1] = 1;
@@ -216,11 +213,6 @@ public class ElevatorController implements Runnable {
 		dropOff[3] = request[4];
 		floorsToVisit.add(dropOff);
 		
-		/*if (request[4] == 1) {
-			doorStuckFault = true;
-		} else if (request[4] == 2) {
-			elevatorStuckFault = true;
-		}*/
 		faultList.add(request[4]);
 		faultList.add(request[4]);
 		notifyAll();
@@ -295,10 +287,16 @@ public class ElevatorController implements Runnable {
 		return elevatorInfo;
 	}
 	
+	/**
+	 * @return
+	 */
 	public int getFault() {
 		return fault;
 	}
 	
+	/**
+	 * @return
+	 */
 	public boolean getMoving() {
 		return moving;
 	}
@@ -337,56 +335,7 @@ public class ElevatorController implements Runnable {
             			moveElevator(direction);
         			}
         		}        	
-        	//executeRequest(getRequest());
         	}
         }
 	}
-	
-	/**
-	 * CURRENTLY UNUSED- MAY BE NEEDED FOR FUTURE REFERENCE
-	 * Fulfill a Passenger's request. Begin by calculating the direction to the passenger.
-	 * Then pick up Passenger at the source floor, then travel to the destination floor. 
-	 * 
-	 * @param request The passenger's request [time, source, direction, destination]
-	 *
-	public void executeRequest(int[] request) {
-		System.out.println("Starting Request");
-		activeJob = request;
-		inUse = true;
-		
-		if (elevatorInfo[0] != activeJob[1]) { //elevator already at src floor
-			//Calculate the initial direction of the Elevator to reach the Passenger based on the request's source floor and the Elevator's current floor
-			int direction = elevatorInfo[0]-activeJob[1] < 0 ? 1 : 0;
-			
-			elevatorInfo[1] = direction;//Update elevator direction
-			elevatorInfo[2] = activeJob[1];//Update destination to request's source
-			
-			//Move Elevator to the source floor
-			moveElevator(activeJob[1], direction);
-			while (moving) {//Listen until the elevator reaches the source floor
-				receiveControl(true);
-				if (working == false) {
-					return;
-				}
-			}// Elevator has arrived at source
-		} else {
-			System.out.println("Elevator " + port + " is already at the source floor: " + activeJob[1]);
-		}
-		
-		//Prepare to move to destination
-		elevatorInfo[1] = activeJob[2];//Update elevator direction
-		elevatorInfo[2] = activeJob[3];//Update destination to request's destination
-		
-		//Move Elevator to destination floor
-		moveElevator(activeJob[3],activeJob[2]);
-		while (moving) {//Listen until elevator reaches destination
-			//System.out.println("Listening...");
-			receiveControl(true);
-			if (working == false) {
-				return;
-			}
-		}// Elevator has reached the destination
-		inUse = false;
-	}
-	*/
 }

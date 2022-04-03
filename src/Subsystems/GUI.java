@@ -1,14 +1,15 @@
-/**
- * 
- */
 package Subsystems;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.util.ArrayList;
 import java.awt.Font;
 /**
- * @author Dominique Giguere Samson
- *To do: Direction arrow, faults
+ * The GUI creates a window that will display the elevator positions. 
+ * Along with which direction they are going and when they fail.
+ * 
+ * @author Group2
+ * @version April 12, 2022
+ *
  */
 public class GUI {
     JFrame f;
@@ -72,7 +73,7 @@ public class GUI {
             int moving = elevator[3];
             int fault = elevator[4];
             for (int i = 1; i < 23; i++) {
-            	if (fault > 0) {//Elevator broken
+            	if(fault == 2) {
             		data[i-1][id+1] = "ERROR";
             	} else {
 	                if (23-cur == i) {//Elevator is at this floor 
@@ -85,7 +86,11 @@ public class GUI {
 		                		data[i-1][id+1] = "Down";
 		                	}
 	            		} else {//Elevator not moving
-	            			data[i-1][id+1] = "Stopped";
+	            			if(fault == 1) {
+	                			data[i-1][id+1] = "DOOR JAMMED";
+	                		}else {
+	                			data[i-1][id+1] = "Stopped";
+	                		}
 	            		}
 	                } else {
 	                    data[i-1][id+1] = "";

@@ -4,18 +4,24 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.io.IOException;
 import java.net.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The floor class is used to simulate the arrival of passengers
  * to the elevators and simulating buttons being pressed.
  *
  * @author Group2
- * @version March 27, 2022
+ * @version April 12, 2022
  */
 public class Floor implements Runnable {
     
 	private DatagramPacket sendPacket;	
 	private DatagramSocket controlSocket;
+	
+	private LocalTime time = LocalTime.now();
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+	private String fTime  = time.format(formatter);
 	
     /**
      * Floor constructor.
@@ -65,7 +71,7 @@ public class Floor implements Runnable {
 	    		}
 	        	
 	        	//Send datagram to floor request handler
-	        	System.out.println("Sending Request: " + line);
+	        	System.out.println(fTime + " (Floor): " + "Sending Request: " + line);
 	        	try {
 					controlSocket.send(sendPacket);
 				} catch (IOException e1) {
@@ -80,7 +86,7 @@ public class Floor implements Runnable {
 		} catch (FileNotFoundException e) {
             
             //Prints if there is no file found
-			System.out.println("File not found.");
+			System.out.println(fTime + " (Floor): " + "File not found.");
 		
         }
     }

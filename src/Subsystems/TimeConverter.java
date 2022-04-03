@@ -5,6 +5,9 @@ import java.util.concurrent.TimeUnit;
  * The time converter class is utilized to do any time calculations. It converts
  * a string in the format of HH:mm:ss.ms to ms and from ms to a string in that 
  * same format.
+ * 
+ *  @author Group2
+ *  @version April 12, 2022
  */
 public final class TimeConverter {
 	
@@ -39,5 +42,5 @@ public final class TimeConverter {
 
 		return timeString;
 	}
-
+	
 }

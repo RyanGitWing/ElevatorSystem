@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -11,14 +13,18 @@ import java.util.ArrayList;
  * It provides a method to access the first request in the list.
  * 
  * @author Group2
- * @version March 27, 2022
+ * @version April 12, 2022
  */
 public class FloorRequestHandler implements Runnable {
 
 	private DatagramSocket receiveSocket;
 	private DatagramPacket receivePacket;
 	private ArrayList<int[]> requests;
-
+	
+	private LocalTime time = LocalTime.now();
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+    private String fTime  = time.format(formatter);
+    
 	/**
 	 * Constructor of a Port object. Binds the DatagramSocket
 	 * to the specified port.
@@ -50,7 +56,7 @@ public class FloorRequestHandler implements Runnable {
 		}
         requests.add(request);
         String direction = request[2] == 1 ? "up" : "down";
-        System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler received request:" + " From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
+        System.out.println(fTime + " (Scheduler -> FloorRequestHandler)" + ": Scheduler received request:" + " From floor " + request[1] + " to go " + direction + " to floor " + request[3] + ".\n");
 		notifyAll();
 		
 	}
@@ -86,7 +92,15 @@ public class FloorRequestHandler implements Runnable {
         request[3] = Integer.parseInt(splitString[3]);       //destination floor
         request[4] = Integer.parseInt(splitString[4]);       //type of fault
         
-        addRequest(request);
+        if(request[1] > 0 && request[1] < 23) {
+        	if(request[3] > 0 && request[3] < 23) {
+        		addRequest(request);
+        	} else {
+        		System.out.println(fTime + " (Scheduler -> FloorRequestHandler): " + "Invalid destination floor!");
+        	}
+        } else {
+        	System.out.println(fTime + " (Scheduler -> FloorRequestHandler): " + "Invalid source floor!");
+        }
 	}
 	
 	/**

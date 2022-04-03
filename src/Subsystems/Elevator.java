@@ -5,14 +5,15 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Random;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Elevator class that creates an elevator object which moves
  * from one floor to another based on the request. 
  *
  * @author Group2
- * @version March 27, 2022
+ * @version April 12, 2022
  */
 public class Elevator implements Runnable
 {
@@ -27,7 +28,7 @@ public class Elevator implements Runnable
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
 	private final static int NUMELEVATORS = 4;
 	
-	private int id, currentFloor, direction, destination, sender, error;
+	private int id, currentFloor, directionLamp, sender;
 	
 	private boolean doorClosed, working;
 	
@@ -35,6 +36,10 @@ public class Elevator implements Runnable
 	private DatagramPacket receivePacket;
 	
 	private DatagramSocket sendReceiveSocket;
+	
+	private LocalTime time = LocalTime.now();
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+    private String fTime  = time.format(formatter);
 
 	/**
 	 * Elevator Constructor
@@ -45,7 +50,7 @@ public class Elevator implements Runnable
 	{
 		this.id = id;
 		currentFloor = 1;
-		direction = 1;
+		directionLamp = 1;
 		doorClosed = false;
 		working = true;
 		motor = new Motor();   
@@ -82,7 +87,6 @@ public class Elevator implements Runnable
 	/**
 	 * Receives datagram packets from the elevator controller
 	 * 
-	 * @param 
 	 */
     public void receiveControl() {
           byte data[] = new byte[100];
@@ -92,8 +96,8 @@ public class Elevator implements Runnable
           try {        
              sendReceiveSocket.receive(receivePacket);
           } catch (IOException e) {
-             System.out.print("IO Exception: likely:");
-             System.out.println("Receive Socket Timed Out.\n" + e);
+             System.out.print(fTime + " (Elevator): " + "IO Exception: likely:");
+             System.out.println(fTime + " (Elevator): " + "Receive Socket Timed Out.\n" + e);
              e.printStackTrace();
              System.exit(1);
           }
@@ -108,67 +112,63 @@ public class Elevator implements Runnable
 	 */
     public void decodeControl(byte[] msg) {
         int code = msg[0];
-        byte arr[] = new byte[2];
         byte[] reply = new byte[1];
-        Random random = new Random();
-		//error = random.nextInt(5); //20% chance of faulting, change to 0 for guaranteed failure
-		error = 1;//disable errors
         switch (code) 
         {
         case 0: //Elevator doors have opened
     		setDoor(false);
-    		System.out.println("Elevator " + (id-4999) + " door opened!");
+    		System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " door opened!");
             break;
             
         case 1: //Elevator doors have closed
         	setDoor(true);
-    		System.out.println("Elevator " + (id-4999) + " door closed!");
+    		System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " door closed!");
             break;
             
         case 2: //Set elevator direction up
         	setDirection(1);
-            System.out.println("Elevator " + (id-4999) + " direction up");
-            System.out.println("Elevator " + (id-4999) + " up direction button on");
+            System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " direction up");
+            System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " Direction Lamp: UP");
             break;
             
         case 3://Set elevator direction down
         	setDirection(0);
-            System.out.println("Elevator " + (id-4999) + " direction down");
-            System.out.println("Elevator " + (id-4999) + " down direction button on");
+            System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " direction down");
+            System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " Direction Lamp: DOWN");
             break;
             
         case 4://Turn elevator motor on
-        	System.out.println("Elevator " + (id-4999) + " motor on");
+        	System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " motor on");
         	turnOnMotor();
             break;
             
-        case 20: 
+        case 20: //closes socket when elevator shuts down
         	sendReceiveSocket.disconnect();
         	working = false;
             break;
             
-        case 21:
+        case 21://elevator door is stuck open, self repair
         	try {
-				System.out.println("Elevator " + (id-4999) + " door stuck, now repairing");
+				System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " door stuck, now repairing");
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
         	setDoor(true);
-    		System.out.println("Elevator " + (id-4999) + " door closed!");
+    		System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " door closed!");
     		reply[0] = 6;
     		sendControl(reply);
             break;
             
-        case 22:
+        case 22://elevator door is stuck close, self repair
         	try {
-				System.out.println("Elevator " + (id-4999) + " door stuck, now repairing");
+				System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " door stuck, now repairing");
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
         	setDoor(false);
-    		System.out.println("Elevator " + (id-4999) + " door opened!");
+    		System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " door opened!");
     		reply[0] = 7;
             break;
         }
@@ -187,27 +187,6 @@ public class Elevator implements Runnable
 		// Will keep moving until reaches destination floor
 		while (motor.getOn()) 
 		{
-			/*
-			int temp = currentFloor - destination;
-			int distanceBetweenFloor = Math.abs(temp);
-			*/
-			Random random = new Random();
-			//error = random.nextInt(5); //20% chance of faulting, change to 1 for guaranteed failure
-			error = 1;//disable errors
-			if ( error == 0 ) {
-				motor.toggleMotor(false);
-				return;
-				/*
-				System.out.println("Elevator has exceeded time");
-				
-				//Sends current floor data to controller 
-				byte arr[] = new byte[2];
-				arr[0] = (byte) 13;
-				arr[1] = (byte) currentFloor;
-				sendControl(arr);
-				*/
-			}
-			
 			// Sleep the elevator thread for the time it takes to get to destination
 			try {
 				Thread.sleep(TIME_BETWEEN_EACH_FLOOR);
@@ -217,7 +196,7 @@ public class Elevator implements Runnable
 			
 			// Decrement the floor to simulate going down a floor level,
 			// if the current floor is above the destination floor
-			if (direction == 0) 
+			if (directionLamp == 0) 
 			{
 				currentFloor--;
 				
@@ -227,7 +206,7 @@ public class Elevator implements Runnable
 			}
 			
 			// Display the elevator traversing each floor to get to destination floor
-			System.out.println("Elevator " + (id-4999) + " approaching floor " + currentFloor);
+			System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " approaching floor " + currentFloor);
 			
 			//Sends current floor data to controller 
 			byte arr[] = new byte[2];
@@ -248,8 +227,8 @@ public class Elevator implements Runnable
 	            System.exit(1);
 	        }
 	        if (data[0] == 5) {
-	        	System.out.println("Elevator " + (id-4999) + " motor off");
-	        	System.out.println("Elevator " + (id-4999) + " has arrived at floor " + currentFloor);
+	        	System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " motor off");
+	        	System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " has arrived at floor " + currentFloor);
 	        	motor.toggleMotor(false);
 	        }
 		}
@@ -275,7 +254,11 @@ public class Elevator implements Runnable
 		doorClosed = closeDoor;
 		
 	}
-
+	
+	/**
+	 * Get the status of the elevator door.
+	 * 
+	 */
 	public boolean getDoor(){
 		return doorClosed;
 	}
@@ -287,7 +270,7 @@ public class Elevator implements Runnable
 	 */
 	public void setDirection(int direction)
 	{
-		this.direction = direction;
+		this.directionLamp = direction;
 	}
 	
 	/**
@@ -297,13 +280,7 @@ public class Elevator implements Runnable
 	 */
 	public int getDirection() 
 	{
-		return direction;
-	}
-
-	
-
-	public int getError(){
-		return error;
+		return directionLamp;
 	}
 	
 	/**
@@ -326,7 +303,9 @@ public class Elevator implements Runnable
 		return currentFloor;
 	}
 	
-	
+	public boolean getWorking() {
+		return working;
+	}
 	
 	/**
 	 * @param args

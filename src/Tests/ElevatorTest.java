@@ -35,50 +35,28 @@ public class ElevatorTest {
 	}
 	
 	@Test
+	public void testDoorRepairToCloseFault() 
+	{
+		Elevator elevator = new Elevator(9999);
+		byte []b = {21};
+		elevator.decodeControl(b);
+		assertTrue(elevator.getDoor()); 
+	}
+	
+	@Test
+	public void testDoorRepairToOpenFault() 
+	{
+		Elevator elevator = new Elevator(9009);
+		byte []b = {22};
+		elevator.decodeControl(b);
+		assertFalse(elevator.getDoor()); 
+	}
+	
+	@Test
 	public void testGetElevatorID() 
 	{
 		Elevator elevator = new Elevator(7777);
 		assertEquals(elevator.getElevatorID(), 7777); 
+		
 	}
-
-	@Test
-	public void testMovingFault(){
-		Elevator elevator =  new Elevator(9999);
-		Motor motor =  new Motor();
-		byte []b = {4};
-		while(true){
-			elevator.decodeControl(b);
-
-			if(elevator.getError() == 0){
-				System.out.println("System Failed.");
-				assertFalse(motor.getOn());
-				return;
-			} else {
-				assertTrue(motor.getOn());
-				return;
-
-			}
-		}
-	}
-
-	@Test
-	public void testDoorRepairFault(){
-		Elevator elevator =  new Elevator(6356);
-		byte []b = {0};
-
-		while(true){
-			elevator.decodeControl(b);
-
-			if(elevator.getError() == 0){
-				System.out.println("System Error.");
-				assertFalse(elevator.getDoor());
-				return;
-			} else {
-				assertTrue(elevator.getDoor());
-				return;
-
-			}
-		}
-	}
-
 }

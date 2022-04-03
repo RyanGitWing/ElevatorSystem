@@ -1,4 +1,6 @@
 package Subsystems;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 /**
  * The Scheduler class takes requests from the floor subsystem
@@ -7,8 +9,7 @@ import java.util.*;
  * commanding the elevator to move to the passenger's destination floor.
  * 
  * @author Group2
- * @version March 27, 2022
- *
+ * @version April 12, 2022
  */
 
 public class Scheduler implements Runnable {
@@ -26,6 +27,11 @@ public class Scheduler implements Runnable {
     //Gui drawer
     private GUI gui;
     private int defaultPort;
+    
+    private LocalTime time = LocalTime.now();
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+    private String fTime  = time.format(formatter);
+    
     /**
      * Constructor of a Scheduler object.
      * 
@@ -39,7 +45,6 @@ public class Scheduler implements Runnable {
         defaultPort = PORTOFFSET;
         gui = new GUI();
         for (int i = 0; i < numElevators; i++) {
-            //createController(PORTOFFSET+i);
         	ElevatorController controller = new ElevatorController(PORTOFFSET + i);
             controllers.add(controller);
             int[] elevatorStats = {PORTOFFSET + i, 1, 1, 0, 0};
@@ -73,7 +78,6 @@ public class Scheduler implements Runnable {
             controllerthread.start();
     	}
     }
-
 
     /**
      * Determines which elevator is best used to handle the request.
@@ -150,26 +154,12 @@ public class Scheduler implements Runnable {
             int[] request = requestHandler.getRequest();
             if (request[0] != -1) {//Check for non empty request list
                 int elevatorPort = getElevator(request[1]);
-                System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler using Elevator " + (elevatorPort - 4999) + " to execute request " + request[1] + "," + request[3]);
-                //instead of execute request, simply addRequest to elevatorcontroller thread
-                //controllers.get(elevatorPort - PORTOFFSET).executeRequest(request);
+                System.out.println(fTime + " (Scheduler)" + ": Scheduler using Elevator " + (elevatorPort - 4999) + " to execute request " + request[1] + "," + request[3]);
+                System.out.println(fTime + " (Scheduler)" + " Floor " + request[3] + " lamp turned on.");
                 controllers.get(elevatorPort - PORTOFFSET).addRequest(request);
             }
             updateElevatorDisplayStats();
             gui.updateGUI(elevatorDisplayStats);
         }
     }
-    
-    /**
-     * CURRENTLY UNUSED - MAY BE NEEDED FOR FUTURE REFERENCE
-     * Create a elevator controller with the defined port
-     * 
-     * @param port integer that holds the port
-     
-    private void createController(int port) {
-        ElevatorController controller = new ElevatorController(port);
-        controllers.add(controller);
-        Thread controllerthread = new Thread(controller);
-        controllerthread.start();     
-    }*/
 }

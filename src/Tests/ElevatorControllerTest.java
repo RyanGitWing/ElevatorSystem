@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Test;
 
+import Subsystems.Elevator;
 import Subsystems.ElevatorController;
 
 /**
@@ -48,6 +49,21 @@ public class ElevatorControllerTest {
 		ec.addRequest(req);
 		ec.setInUse();
 		assertTrue(ec.getInUse());
+	}
+	
+	@Test
+	public void testHardFault() {
+		ElevatorController ec = new ElevatorController(9011);
+		Thread ect = new Thread(ec);
+		Elevator e = new Elevator(9011);
+		int[] req = {0, 2, 1, 10, 2};
+		ec.addRequest(req);
+		ect.start();
+		while(e.getWorking()) 
+		{
+			e.receiveControl();
+		}
+		assertEquals(2,ec.getFault());
 	}
 
 }
