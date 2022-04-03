@@ -19,14 +19,13 @@ public class FloorRequestHandlerTest {
 	public void testGetRequest() {
 		Thread f = new Thread(new Floor());
 		FloorRequestHandler requestHandler = new FloorRequestHandler(4999);
-		Thread requestHandlerThread = new Thread(requestHandler);
 		
 		f.start();
-		requestHandlerThread.start();
+		requestHandler.receiveRequest();
 		
 		int[] request = requestHandler.getRequest();
-		assertEquals(request[1], 2);
+		assertEquals(request[1], 1);
 		assertEquals(request[2], 1);
-		assertEquals(request[3], 4);
+		assertEquals(request[3], 22);
 	}
 }
