@@ -26,11 +26,13 @@ public class ElevatorController implements Runnable {
 	private int[] elevatorInfo;
 	//inUse is true when the controller is executing a request;
 	private boolean inUse, working;
+	private boolean doorStuckFault, elevatorStuckFault;
 	//Is the elevator broken?
 	private int fault;
-	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out]
-	//{[1,1,0],[7,0,1],[3,1,0],[5,0,1]}
-	
+	private ArrayList<Integer> faultList;
+	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out, fault]
+	//{[1,1,0,0],[7,0,1,0],[3,1,0,0],[5,0,1,0]}
+
 	/**
 	 * Constructor of ElevatorController class.
 	 *
@@ -41,7 +43,10 @@ public class ElevatorController implements Runnable {
 		inUse = false;
 		requests = new ArrayList<int[]>();
 		floorsToVisit = new ArrayList<int[]>();
-
+		faultList = new ArrayList<Integer>();
+		fault = 0;
+		//doorStuckFault = false;
+		//elevatorStuckFault = false;
 		
 		//Create DatagramSocket
 		try {
@@ -92,20 +97,12 @@ public class ElevatorController implements Runnable {
 	 * Listen to sendreceiveSocket for UDP messages, then send the datagram's data to be decoded.
 	 *  
 	 */
-	public void receiveControl(boolean setTimeOut) {
+	public void receiveControl() {
 	      byte data[] = new byte[100];
 	      receivePacket = new DatagramPacket(data, data.length);
 	      // Block until a datagram packet is received from receiveSocket.
-	      try {     
-	    	 if (setTimeOut) {
-		         sendReceiveSocket.setSoTimeout(3000);
-	    	 }
-	         sendReceiveSocket.receive(receivePacket);
-	      } catch (SocketTimeoutException se) {
-	    	  System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Scheduler has detected that Elevator " + (port-4999) + " has exceeded the expected travel time. The elevator has been disabled.\n");
-	    	  sendControl((byte) 20);
-	    	  working = false;
-	    	  return;
+	      try {
+	    	  sendReceiveSocket.receive(receivePacket);
 	      } catch (IOException e) {
 	         e.printStackTrace();
 	         System.exit(1);
@@ -122,36 +119,12 @@ public class ElevatorController implements Runnable {
 		int code = msg[0];
 		switch (code) {
 		case 6: //Elevator doors have opened
-			if (msg[1] == 1) {
-				try {
-					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-4999) + " door");
-					fault = 1; //Set fault to true
-					Thread.sleep(2000);
-					sendControl((byte) 0);
-					receiveControl(false);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			} else {
-				System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " Door open");
-				fault = 0;//Set fault to false
-			}
+			System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Elevator " + (port-4999) + " Door open");
+			fault = 0;
 			break;
 		case 7: //Elevator doors have closed
-			if (msg[1] == 1) {
-				try {
-					System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Door stuck, now repairing elevator " + (port-4999) + " door");
-					fault = 1;//Set fault to true
-					Thread.sleep(2000);
-					sendControl((byte) 1);
-					receiveControl(false);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			} else {
-				System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Door close");
-				fault = 0; //Set fault to false
-			}
+			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Door close");
+			fault = 0;
 			break;
 		case 8: //Elevator motor is powered on
 			System.out.println(TimeConverter.msToTime(activeJob[0])  + ": Elevator " + (port-4999) + " Motor on");
@@ -191,7 +164,6 @@ public class ElevatorController implements Runnable {
 		moving = false;
 		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to open door.");
 		sendControl((byte) 0);//Open elevator's doors
-		receiveControl(false);
 		if (floorsToVisit.isEmpty()) {
 			inUse = false;
 		}
@@ -206,8 +178,13 @@ public class ElevatorController implements Runnable {
 	public void moveElevator(int direction) {
 		int newDirection = direction == 1 ? 2 : 3;//2: Direction up, 3: Direction Down
 		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to close door.");
-		sendControl((byte) 1); //close doors
-		receiveControl(false);
+		if (doorStuckFault) {
+			sendControl((byte) 21);//close doors fault
+			fault = 1;
+			receiveControl();
+		} else {
+			sendControl((byte) 1); //close doors
+		}
 		//sendControl((byte) (100+destination)); //set elevator destination
         String directionString = direction == 1 ? "up" : "down";
 		System.out.println(TimeConverter.msToTime(activeJob[0]) + ": Instructing elevator " + (port-4999) + " to go " + directionString);
@@ -224,17 +201,28 @@ public class ElevatorController implements Runnable {
 	 */
 	public synchronized void addRequest(int[] request) {
 		activeJob = request;
-		int[] pickUp = new int[3];
+
+		int[] pickUp = new int[4];
 		pickUp[0] = request[1];
 		pickUp[1] = 1;
 		pickUp[2] = 0;
+		pickUp[3] = 0;
 		floorsToVisit.add(pickUp);
 		
-		int[] dropOff = new int[3];
+		int[] dropOff = new int[4];
 		dropOff[0] = request[3];
 		dropOff[1] = 0;
 		dropOff[2] = 1;
+		dropOff[3] = request[4];
 		floorsToVisit.add(dropOff);
+		
+		/*if (request[4] == 1) {
+			doorStuckFault = true;
+		} else if (request[4] == 2) {
+			elevatorStuckFault = true;
+		}*/
+		faultList.add(request[4]);
+		faultList.add(request[4]);
 		notifyAll();
 	}
 	
@@ -321,7 +309,7 @@ public class ElevatorController implements Runnable {
         	setInUse();
         	while(inUse) {
         		if (moving) {
-        			receiveControl(true);
+        			receiveControl();
         			if (working == false) {
     					return;
         			}
@@ -329,7 +317,15 @@ public class ElevatorController implements Runnable {
         		else { //Elevator is Stop but has jobs to do
         			//Src + Dst, *Src + *dst, src + *dst, Dst
         			//check pickUpFloors
-            		int src = floorsToVisit.remove(0)[0];
+        			int[] floor = floorsToVisit.remove(0);
+            		int src = floor[0];
+            		doorStuckFault = floor[3] == 1 ? true : false;
+            		elevatorStuckFault = floor[3] == 2 ? true : false;
+            		if (elevatorStuckFault) {
+            			fault = 2;
+            			sendControl((byte) 20);
+            			return;
+            		}
             		if (elevatorInfo[0] != src) { //elevator not at src floor of the 1st request
             			//Calculate the initial direction of the Elevator to reach the Passenger based on the request's source floor and the Elevator's current floor
             			int direction = elevatorInfo[0]-src < 0 ? 1 : 0;//1 - up, 0 - down

@@ -20,7 +20,7 @@ public class Elevator implements Runnable
 	//faults disabled
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 950;//9500
+	private static final int TIME_BETWEEN_EACH_FLOOR = 300;//9500
 
 	private static final int TIME_TO_OPEN_CLOSE = 100; //1000
 
@@ -109,35 +109,20 @@ public class Elevator implements Runnable
     public void decodeControl(byte[] msg) {
         int code = msg[0];
         byte arr[] = new byte[2];
+        byte[] reply = new byte[1];
         Random random = new Random();
 		//error = random.nextInt(5); //20% chance of faulting, change to 0 for guaranteed failure
 		error = 1;//disable errors
         switch (code) 
         {
         case 0: //Elevator doors have opened
-        	arr[0] = (byte) 6;
-        	
-        	if (error != 0) {
-        		arr[1] = (byte) 0;
-        		setDoor(true);
-        		System.out.println("Elevator " + (id-4999) + " door opened!");
-        	} else {
-        		arr[1] = (byte) 1;
-        	}
-        	
-        	sendControl(arr);
+    		setDoor(false);
+    		System.out.println("Elevator " + (id-4999) + " door opened!");
             break;
             
         case 1: //Elevator doors have closed
-			arr[0] = (byte) 7;
-        	if (error != 0) {
-        		arr[1] = (byte) 0;
-        		setDoor(false);
-        		System.out.println("Elevator " + (id-4999) + " door closed!");
-        	} else {
-        		arr[1] = (byte) 1;
-        	}
-        	sendControl(arr);
+        	setDoor(true);
+    		System.out.println("Elevator " + (id-4999) + " door closed!");
             break;
             
         case 2: //Set elevator direction up
@@ -160,6 +145,31 @@ public class Elevator implements Runnable
         case 20: 
         	sendReceiveSocket.disconnect();
         	working = false;
+            break;
+            
+        case 21:
+        	try {
+				System.out.println("Elevator " + (id-4999) + " door stuck, now repairing");
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	setDoor(true);
+    		System.out.println("Elevator " + (id-4999) + " door closed!");
+    		reply[0] = 6;
+    		sendControl(reply);
+            break;
+            
+        case 22:
+        	try {
+				System.out.println("Elevator " + (id-4999) + " door stuck, now repairing");
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	setDoor(false);
+    		System.out.println("Elevator " + (id-4999) + " door opened!");
+    		reply[0] = 7;
             break;
         }
     }
