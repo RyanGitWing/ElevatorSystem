@@ -1,5 +1,5 @@
 package Subsystems;
-import java.util.ArrayList;
+import java.util.*;
 /**
  * The Scheduler class takes requests from the floor subsystem
  * and executes each request. Executing the request entails commanding
@@ -16,14 +16,15 @@ public class Scheduler implements Runnable {
     //Offset for any port made 
 	private final static int PORTOFFSET = 5000;
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
-	private final static int NUMELEVATORS = 2;
+	private final static int NUMELEVATORS = 4;
     //List of elevator controller objects
     private ArrayList<ElevatorController> controllers;
     //Floor Request Handler object
     private FloorRequestHandler requestHandler;
-    
-    //elevatorInfo = [Port, current floor, direction, dest floor, # passengers]
-    
+    //Elevator stats required for GUI [elevatorPort, current floor, direction, moving, fault]
+    private ArrayList<int[]> elevatorDisplayStats;
+    //Gui drawer
+    private GUI gui;
     /**
      * Constructor of a Scheduler object.
      * 
@@ -33,10 +34,14 @@ public class Scheduler implements Runnable {
     public Scheduler(int numElevators) {
     	requestHandler = new FloorRequestHandler(4999);
         controllers = new ArrayList<ElevatorController>();
+        elevatorDisplayStats = new ArrayList<int[]>();
+        gui = new GUI();
         for (int i = 0; i < numElevators; i++) {
             //createController(PORTOFFSET+i);
         	ElevatorController controller = new ElevatorController(PORTOFFSET + i);
             controllers.add(controller);
+            int[] elevatorStats = {PORTOFFSET + i, 1, 1, 0, 0};
+            elevatorDisplayStats.add(elevatorStats);
         }
     }
     
@@ -97,6 +102,28 @@ public class Scheduler implements Runnable {
     }
     
     /**
+     * Collects information about each elevator, to use for the GUI
+     * 
+     */
+    public void updateElevatorDisplayStats() {
+    	for (ElevatorController controller : controllers) {
+    		int[] info = controller.getInfo();
+    		int port = controller.getPort();
+    		int fault = controller.getFault();
+    		int moving = controller.getMoving() ? 1 : 0; 
+	    	for (int[] elevator : elevatorDisplayStats) {
+	    		if (port == elevator[0]) {//Find the right entry by matching Elevator Port
+	    			elevator[1] = info[0]; //update Current floor
+	    			elevator[2] = info[1]; //update direction
+	    			elevator[3] = moving; //update moving
+	    			elevator[4] = fault; //update fault
+	    		}
+	    	}
+    	}
+    }
+    
+    
+    /**
      * Main method to run the class. Creates a scheduler thread
      * and a request handler thread.
      * @param args
@@ -117,12 +144,15 @@ public class Scheduler implements Runnable {
     public void run() {
         while (true) {
             int[] request = requestHandler.getRequest();
-            
-            int elevatorPort = getElevator(request[1]);
-            System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler using Elevator " + (elevatorPort - 4999) + " to execute request " + request[1] + "," + request[3]);
-            //instead of execute request, simply addRequest to elevatorcontroller thread
-            //controllers.get(elevatorPort - PORTOFFSET).executeRequest(request);
-            controllers.get(elevatorPort - PORTOFFSET).addRequest(request);
+            if (request[0] != -1) {//Check for non empty request list
+                int elevatorPort = getElevator(request[1]);
+                System.out.println(TimeConverter.msToTime(request[0]) + ": Scheduler using Elevator " + (elevatorPort - 4999) + " to execute request " + request[1] + "," + request[3]);
+                //instead of execute request, simply addRequest to elevatorcontroller thread
+                //controllers.get(elevatorPort - PORTOFFSET).executeRequest(request);
+                controllers.get(elevatorPort - PORTOFFSET).addRequest(request);
+            }
+            updateElevatorDisplayStats();
+            gui.updateGUI(elevatorDisplayStats);
         }
     }
     
