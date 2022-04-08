@@ -31,10 +31,6 @@ public class ElevatorController implements Runnable {
 	private ArrayList<Integer> faultList;
 	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out, fault]
 	
-	private LocalTime time = LocalTime.now();
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
-    private String fTime  = time.format(formatter);
-	
 	/**
 	 * Constructor of ElevatorController class.
 	 *
@@ -114,6 +110,10 @@ public class ElevatorController implements Runnable {
 	 * @param msg A control message
 	 */
 	public void decodeControl(byte[] msg) {
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
+        
 		int code = msg[0];
 		switch (code) {
 		case 6: //Elevator doors have opened
@@ -158,6 +158,10 @@ public class ElevatorController implements Runnable {
 	 * Stops the Elevator's motor
 	 */
 	public void stopElevator() {
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
+        
 		sendControl((byte) 5);//Stop elevator's motor
 		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to turn off motor.");
 		moving = false;
@@ -175,6 +179,10 @@ public class ElevatorController implements Runnable {
 	 * @param direction 1 - up, 0 - down 
 	 */
 	public void moveElevator(int direction) {
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
+        
 		int newDirection = direction == 1 ? 2 : 3;//2: Direction up, 3: Direction Down
 		System.out.println(fTime + " (Scheduler -> Elevator Controller)" + ": Instructing elevator " + (port-4999) + " to close door.");
 		if (doorStuckFault) {

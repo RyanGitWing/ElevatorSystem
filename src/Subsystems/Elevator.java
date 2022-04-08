@@ -36,10 +36,7 @@ public class Elevator implements Runnable
 	private DatagramPacket receivePacket;
 	
 	private DatagramSocket sendReceiveSocket;
-	
-	private LocalTime time = LocalTime.now();
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
-    private String fTime  = time.format(formatter);
+
 
 	/**
 	 * Elevator Constructor
@@ -89,20 +86,24 @@ public class Elevator implements Runnable
 	 * 
 	 */
     public void receiveControl() {
-          byte data[] = new byte[100];
-          receivePacket = new DatagramPacket(data, data.length);
+        byte data[] = new byte[100];
+        receivePacket = new DatagramPacket(data, data.length);
           
-          // Block until a datagram packet is received from receiveSocket.
-          try {        
-             sendReceiveSocket.receive(receivePacket);
-          } catch (IOException e) {
-             System.out.print(fTime + " (Elevator): " + "IO Exception: likely:");
-             System.out.println(fTime + " (Elevator): " + "Receive Socket Timed Out.\n" + e);
-             e.printStackTrace();
-             System.exit(1);
-          }
-          sender = receivePacket.getPort();
-          decodeControl(data);
+        // Block until a datagram packet is received from receiveSocket.
+        try {        
+           sendReceiveSocket.receive(receivePacket);
+        } catch (IOException e) {
+        	LocalTime time = LocalTime.now();
+        	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+            String fTime  = time.format(formatter);
+            
+           System.out.print(fTime + " (Elevator): " + "IO Exception: likely:");
+           System.out.println(fTime + " (Elevator): " + "Receive Socket Timed Out.\n" + e);
+           e.printStackTrace();
+           System.exit(1);
+        }
+        sender = receivePacket.getPort();
+        decodeControl(data);
     }
     
     /**
@@ -111,6 +112,9 @@ public class Elevator implements Runnable
 	 * @param msg is an array of bytes that is received from the controller
 	 */
     public void decodeControl(byte[] msg) {
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
         int code = msg[0];
         byte[] reply = new byte[1];
         switch (code) 
@@ -193,7 +197,6 @@ public class Elevator implements Runnable
 			} catch (InterruptedException e){
 				
 			}
-			
 			// Decrement the floor to simulate going down a floor level,
 			// if the current floor is above the destination floor
 			if (directionLamp == 0) 
@@ -204,6 +207,9 @@ public class Elevator implements Runnable
 			} else {
 				currentFloor++;
 			}
+	    	LocalTime time = LocalTime.now();
+	    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+	        String fTime  = time.format(formatter);
 			
 			// Display the elevator traversing each floor to get to destination floor
 			System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " approaching floor " + currentFloor);
@@ -226,6 +232,8 @@ public class Elevator implements Runnable
 	            e.printStackTrace();
 	            System.exit(1);
 	        }
+	        time = LocalTime.now();
+	        fTime = time.format(formatter);
 	        if (data[0] == 5) {
 	        	System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " motor off");
 	        	System.out.println(fTime + " (Elevator): " + "Elevator " + (id-4999) + " has arrived at floor " + currentFloor);

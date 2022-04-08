@@ -19,10 +19,6 @@ public class Floor implements Runnable {
 	private DatagramPacket sendPacket;	
 	private DatagramSocket controlSocket;
 	
-	private LocalTime time = LocalTime.now();
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
-	private String fTime  = time.format(formatter);
-	
     /**
      * Floor constructor.
      * 
@@ -44,8 +40,11 @@ public class Floor implements Runnable {
      * 
      * @param inputFile File containing instructions for elevators
      */
-    public void readInput(File inputFile)
-    {
+    public void readInput(File inputFile){
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
+        
 		try {
 
             //Scanner object to read the input file

@@ -20,10 +20,6 @@ public class FloorRequestHandler implements Runnable {
 	private DatagramSocket receiveSocket;
 	private DatagramPacket receivePacket;
 	private ArrayList<int[]> requests;
-	
-	private LocalTime time = LocalTime.now();
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
-    private String fTime  = time.format(formatter);
     
 	/**
 	 * Constructor of a Port object. Binds the DatagramSocket
@@ -47,6 +43,10 @@ public class FloorRequestHandler implements Runnable {
 	 *  @param request The passenger's request [time, source, direction, destination]
 	 */
 	public synchronized void addRequest(int[] request) {
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
+        
 	    //wait until the request list is empty to add the request to the list
         while (!requests.isEmpty()) {
 			try {
@@ -91,6 +91,10 @@ public class FloorRequestHandler implements Runnable {
         request[2] = splitString[2].equals("Up") ? 1 : 0;    //direction of elevator (up = 1, down = 0)
         request[3] = Integer.parseInt(splitString[3]);       //destination floor
         request[4] = Integer.parseInt(splitString[4]);       //type of fault
+        
+    	LocalTime time = LocalTime.now();
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+        String fTime  = time.format(formatter);
         
         if(request[1] > 0 && request[1] < 23) {
         	if(request[3] > 0 && request[3] < 23) {

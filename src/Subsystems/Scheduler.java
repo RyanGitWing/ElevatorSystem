@@ -28,10 +28,6 @@ public class Scheduler implements Runnable {
     private GUI gui;
     private int defaultPort;
     
-    private LocalTime time = LocalTime.now();
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
-    private String fTime  = time.format(formatter);
-    
     /**
      * Constructor of a Scheduler object.
      * 
@@ -153,6 +149,10 @@ public class Scheduler implements Runnable {
         while (true) {
             int[] request = requestHandler.getRequest();
             if (request[0] != -1) {//Check for non empty request list
+            	LocalTime time = LocalTime.now();
+            	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SS");
+                String fTime  = time.format(formatter);
+                
                 int elevatorPort = getElevator(request[1]);
                 System.out.println(fTime + " (Scheduler)" + ": Scheduler using Elevator " + (elevatorPort - 4999) + " to execute request " + request[1] + "," + request[3]);
                 System.out.println(fTime + " (Scheduler)" + " Floor " + request[3] + " lamp turned on.");
