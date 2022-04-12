@@ -266,6 +266,7 @@ public class Elevator implements Runnable
 	/**
 	 * Get the status of the elevator door.
 	 * 
+	 * @return The door status
 	 */
 	public boolean getDoor(){
 		return doorClosed;
@@ -311,6 +312,11 @@ public class Elevator implements Runnable
 		return currentFloor;
 	}
 	
+	/**
+	 * Get the status of the elevator, whether it is working (not boken) or not.
+	 * 
+	 * @return The working status
+	 */
 	public boolean getWorking() {
 		return working;
 	}

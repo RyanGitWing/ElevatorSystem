@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 public class ElevatorController implements Runnable {
 
 	//Request Queue
-	private ArrayList<int[]> requests; //[time, source, dir, dest]
 	private DatagramSocket sendReceiveSocket;
 	private DatagramPacket receivePacket, sendPacket;
  	//Port of Elevator
@@ -28,7 +27,6 @@ public class ElevatorController implements Runnable {
 	private boolean inUse, working;
 	private boolean doorStuckFault, elevatorStuckFault;
 	private int fault;
-	private ArrayList<Integer> faultList;
 	private ArrayList<int[]> floorsToVisit; // [Floor #, passengers in, passengers out, fault]
 	
 	/**
@@ -39,9 +37,7 @@ public class ElevatorController implements Runnable {
 	 */
 	public ElevatorController(int port) {
 		inUse = false;
-		requests = new ArrayList<int[]>();
 		floorsToVisit = new ArrayList<int[]>();
-		faultList = new ArrayList<Integer>();
 		fault = 0;
 		
 		//Create DatagramSocket
@@ -221,24 +217,7 @@ public class ElevatorController implements Runnable {
 		dropOff[3] = request[4];
 		floorsToVisit.add(dropOff);
 		
-		faultList.add(request[4]);
-		faultList.add(request[4]);
 		notifyAll();
-	}
-	
-	/**
-	 * Gets first request from list of all requests
-	 * @return first request
-	 */
-	public synchronized int[] getRequest() {
-		while (requests.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-			}
-		}
-		
-		return requests.remove(0);
 	}
 	
 	/**
@@ -269,6 +248,7 @@ public class ElevatorController implements Runnable {
 	
 	/**
 	 * Returns floor information for specified request
+	 * 
 	 * @param i index of floor location
 	 * @return floor location and passenger info
 	 */
@@ -296,14 +276,18 @@ public class ElevatorController implements Runnable {
 	}
 	
 	/**
-	 * @return
+	 * Get the fault value given by the input file.
+	 * 
+	 * @return The fault value
 	 */
 	public int getFault() {
 		return fault;
 	}
 	
 	/**
-	 * @return
+	 * Get the moving status of the elevator.
+	 * 
+	 * @return Whether the elevator is moving or not
 	 */
 	public boolean getMoving() {
 		return moving;
@@ -325,10 +309,14 @@ public class ElevatorController implements Runnable {
         			//check pickUpFloors
         			int[] floor = floorsToVisit.remove(0);
             		int src = floor[0];
+            		
             		doorStuckFault = floor[3] == 1 ? true : false;
             		elevatorStuckFault = floor[3] == 2 ? true : false;
+            		
+            		//Check if the elevator is supposed to get stuck
             		if (elevatorStuckFault) {
             			fault = 2;
+            			// Disconnect the elevator making it not usable
             			sendControl((byte) 20);
             			return;
             		}

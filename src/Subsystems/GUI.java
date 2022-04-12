@@ -39,7 +39,7 @@ public class GUI {
                          {"1","","","",""}};
     
     /**
-     * 
+     * Create the GUI.
      */
     public GUI() {
         f=new JFrame();
@@ -65,6 +65,11 @@ public class GUI {
     }
     
     
+    /**
+     * Update the GUI according to the information process by the elevator.
+     * 
+     * @param ElevatorDisplayStats Moving information of the elevator
+     */
     public void updateGUI(ArrayList<int[]> ElevatorDisplayStats) {
         for (int[] elevator: ElevatorDisplayStats) {
             int id = elevator[0] - PORTOFFSET;

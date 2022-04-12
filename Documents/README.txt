@@ -5,25 +5,22 @@ ElevatorProject
 README.txt
 elevator_math.xlsx
 Class Diagram
-Sequence Diagrams
-State Diagrams
+Sequence Diagram
+State Diagram
 Timing Diagrams
+Demo_Video.mp4 (floor console not displayed b/c we want to
+see the other two subsystems better)
+Group2_Final_Report.pdf
 
 ---------------------- Description ----------------------
 
 Elevator system that reads and process an instruction file.
-The floor acts as the client which instructs the elevator on
-where to go pick up an individual. The scheduler acts as the 
-middle which takes the information provided by the floor and
-delivers it to the elevator. The elevator, also a client,
-gets the information and follows the instructions.
-
-In this iteration, fault handling was added as well as fault 
-correction.
-
-Currently, when running this program, the errors are generated 
-using a random number generator. This will be changed for the
-final iteration where it is a set fault that will be handled.
+The floor sends request through UDP to the floorRequestHandler 
+then the scheduler takes the request from the floorRequestHandler.
+The scheduler chooses the closest elevator to handle the request 
+and sends it to an elevatorController. The elevatorController sends 
+controls through UDP to manipulate its associated elevator to
+handle the request.
 
 ---------------------- Responsibilities ----------------------
 
@@ -33,27 +30,25 @@ and design process. For the sake of dividing some of the work,
 each person was assigned tasks.
 
 Tyler
-    - Fault Handling
     - Test Classes
+    - GUI creation
 Aleksandar
-    - Fix Scheduler and Elevator Subsystem
-
-Dominique
-    - Fix Scheduler and Elevator Subsystem
-
-Ryan
-    - Fault Handling
+    - Fix Fault Handling
     - Test Classes
-
+Dominique
+    - GUI creation
+Ryan
+    - Fix Fault Handling
+    - Test Classes
 Harrison 
     - Diagrams
-    - Test Classes
+    - Timing Performance
 ---------------------- Classes ----------------------
 
 Elevator.java
 
-    Elevator class that creates an elevator object which moves
-     from one floor to another based on the request. 
+    Elevator class that creates an elevator object which moves 
+    from one floor to another based on the request. 
 
 Motor.java
     
@@ -62,15 +57,15 @@ Motor.java
 
 Scheduler.java
 
-    The Scheduler class takes requests from the floor subsystem
-     and executes each request. Executing the request entails commanding
-     the elevator to move to the floor where the request was made and then
-     commanding the elevator to move to the passenger's destination floor. 
+    The Scheduler class takes requests from the floor subsystem 
+    and executes each request. Executing the request entails commanding 
+    the elevator to move to the floor where the request was made and then 
+    commanding the elevator to move to the passenger's destination floor. 
 
 Floor.java
 
-    The floor class is used to simulate the arrival of passengers
-     to the elevators and simulating buttons being pressed. 
+    The floor class is used to simulate the arrival of passengers 
+    to the elevators and simulating buttons being pressed. 
 
 TimeConverter.java
 
@@ -80,14 +75,19 @@ TimeConverter.java
     
 FloorRequestHandler.java
 
-    The FloorRequestHandler class receives UDP packets from
-      the floor subsystem with the request and stores it in a list.
-     It provides a method to access the first request in the list.
+    The FloorRequestHandler class receives UDP packets from 
+    the floor subsystem with the request and stores it in a list.
+    It provides a method to access the first request in the list.
 
 ElevatorController.java
     
     ElevatorController is in charge of controlling its Elevator to fulfill the request of the passenger.
-       ElevatorController communicates by receiving and sending  UDP messages to a well known port on it's Elevator.
+    ElevatorController communicates by receiving and sending  UDP messages to a well known port on it's Elevator.
+
+GUI.java
+
+    The GUI creates a window that will display the elevator positions. 
+    Along with which direction they are going and when they fail.
  
 ElevatorControllerTest.java
     
