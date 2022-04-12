@@ -18,12 +18,11 @@ import java.time.format.DateTimeFormatter;
 public class Elevator implements Runnable
 {
 	
-	//faults disabled
 	private Motor motor;
 	
-	private static final int TIME_BETWEEN_EACH_FLOOR = 300;//9500
+	private static final int TIME_BETWEEN_EACH_FLOOR = 9500;//9500
 
-	private static final int TIME_TO_OPEN_CLOSE = 100; //1000
+	private static final int TIME_TO_OPEN_CLOSE = 1000; //1000
 
 	//Number of Elevators (must be consistent between Scheduler.java and Elevator.java
 	private final static int NUMELEVATORS = 4;
